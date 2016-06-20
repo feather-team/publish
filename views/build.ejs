@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feather Quick Build</title>
+    <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body>
+    <div class="container" id="build"> 
+        <h3 class="page-header">feather自动编译系统</h3>
+        <form action="">
+            <div class="form-group">    
+                <label for="">请输入分支名：</label>
+                <div class="input-group">
+                    <input type="text" v-model="branch_name" class="form-control">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button" v-on:click="fetchRepo" v-bind:class="{ 'loading': isLoading }">{{search_btn}}</button>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group" v-if="hasRepo">
+                <label for="">请勾选仓库：</label>
+                <div class="checkbox" v-for="repo in repos">
+                    <label for="{{repo}}">
+                        <input type="checkbox" v-model="reposNames" id="{{repo}}" value="{{repo}}" /> 
+                        {{repo}}&emsp; 
+                    </label>             
+                </div><br>
+                <a href="javascript:;" id="releaseBtn" class="btn btn-primary" v-on:click="releaseRepo" v-bind:class="{ 'loading': isLoading }" >{{release_btn}}</a>
+            </div>
+        </form>
+        <div class="panel panel-info" v-if="hasResult">
+            <div class="panel-heading">编译结果</div>
+            <div class="panel-body">{{releaseResult}}</div>
+        </div>
+    </div>
+    <script src="/bower_components/vue/dist/vue.min.js"></script>
+    <script src="/bower_components/vue-resource/dist/vue-resource.min.js"></script>
+    <script src="/javascripts/build.js"></script>
+</body>
+</html>

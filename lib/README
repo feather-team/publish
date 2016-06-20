@@ -1,0 +1,10 @@
+service
+========
+
+servcie用于给controller 提供服务这里的代码应该与 test 文件夹里的代码文件结构同构，因为service 里的代码都是应该经过单元测试的
+
+__功能列表__
+
+* fisopt 文件处理模块
+* gitopt git处理模块
+

@@ -1,8 +1,21 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font: 15px "Microsoft Yahei","Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 a {
   color: #00B7FF;
+}
+
+ul{
+    margin:0;
+    padding:0;
+}
+
+.loading{
+  cursor: not-allowed;
+  filter: alpha(opacity=65);
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  opacity: .65;
+  content: 'Loading...';
 }

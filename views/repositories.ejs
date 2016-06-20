@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Respositories</title>
+    <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="/stylesheets/repositories.css">
+</head>
+
+<body>
+    <div class="container" id="addRepo">
+        <h3 class="page-header">添加仓库</h3>
+        <form>
+            <div class="form-group">
+                <input type="text" v-model="repo_address" class="form-control">
+            </div>
+            <div class="form-group">
+                <a class="btn btn-primary" id="addBtn" v-on:click="addRepo" v-bind:class="{ 'loading': isLoading }" href="javascript:;">{{repo_btn}}</a>
+                <span v-show="show_errmsg" class="errmsg">{{repo_errmsg}}</span>
+            </div>
+        </form>
+        <h3 class="page-header">仓库列表：</h3>
+        <div class="treeview">
+            <ul class="list-group">
+                <li class="list-group-item" v-for="group in groups">
+                    <span class="icon expand-icon glyphicon glyphicon-object-align-horizontal"></span>
+                    <span class="icon node-icon"></span><b>{{ $key }}</b>
+                    <ul class="list-group-inline">
+                        <li class="list-group-item" v-for="repo in group">
+                            <span class="indent"></span>
+                            <span class="icon expand-icon glyphicon glyphicon-file"></span>
+                            <span class="icon node-icon"></span>{{ repo.name }}
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script src="/bower_components/vue/dist/vue.min.js"></script>
+    <script src="/bower_components/vue-resource/dist/vue-resource.min.js"></script>
+    <script src="/javascripts/repo.js"></script>
+</body>
+
+</html>
