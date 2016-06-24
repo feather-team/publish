@@ -14,7 +14,7 @@ router.post('/repo/add', controllers.repo.add);
 router.get('/repo/search', controllers.repo.search);
 
 router.get('/build',controllers.build);
-router.get('/fetchRepo',controllers.build.fetchRepo);
-router.post('/releaseRepo',controllers.build.releaseRepo);
+//router.get('/fetchRepo',controllers.build.fetchRepo);
+router.post('/build/release', controllers.build.release);
 
 module.exports = router;

@@ -31,7 +31,7 @@ new Vue({
             if( this.isLoading ) return false;
             this.$set('isLoading',true);
             this.$set('release_btn','Loading...');
-            this.$http.post('/releaseRepo',{
+            this.$http.post('/build/release',{
                 reposNames : this.reposNames,
                 fetchName : this.branch_name
             }).then(function(res){

@@ -70,6 +70,7 @@ exports.add = function(address){
         }
     }
 
+    result.factory = key;
     result.status = 'initializing';
     result.dir = GIT_PATH + key;
     RepoModel.save(key, result);
@@ -105,6 +106,7 @@ exports.add = function(address){
 function updateBranch(repo){
     if(repo.fConf && repo.status == 'initialized'){
         Process({
+            desc: '克隆仓库 [' + key + ']',
             cmd: 'git',
             args: ['branch', '-r'],
             cwd: repo.dir,
@@ -119,7 +121,7 @@ function updateBranch(repo){
                     }
                 });
 
-                BranchModel.save(repo.group + '/' + repo.name, branches);
+                BranchModel.save(key, branches);
             } 
         });
     }

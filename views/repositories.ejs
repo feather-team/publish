@@ -46,6 +46,7 @@
             <ul id="tasks" class="list-group">
                 <template v-for="task in tasks">
                     <li class="list-group-item list-group-item-{{task.className}}">
+                        <p>描述：{{task.desc}}</p>
                         <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
                         <p>状态：任务{{task.text}}</p>
                     </li>
