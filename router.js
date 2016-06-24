@@ -7,12 +7,12 @@ var controllers = {};
 	controllers[item] = require('./controller/' + item + '.js');
 });
 
-router.get('/', controllers.main);
-router.get('/user', controllers.main.user);
+router.get('/', controllers.repo);
 router.get('/repo', controllers.repo);
+router.get('/repo/list', controllers.repo.getList);
+router.post('/repo/add', controllers.repo.add);
+router.get('/repo/search', controllers.repo.search);
 
-router.get('/getRepoList',controllers.repo.getRepoList);
-router.post('/updateRepoList',controllers.repo.updateRepoList);
 router.get('/build',controllers.build);
 router.get('/fetchRepo',controllers.build.fetchRepo);
 router.post('/releaseRepo',controllers.build.releaseRepo);

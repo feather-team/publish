@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 
 var app = express();
 var http = require('http');
+var server = http.Server(app);
 
 PATH = __dirname;
 REPO_PATH = path.resolve(__dirname, 'repos');
@@ -21,20 +22,40 @@ app.use(express.static(path.join(__dirname, 'static')));
 
 app.use(require('./router.js'));
 
-http.createServer(app).listen(app.get('port'),function(){
+server.listen(app.get('port'),function(){
     console.log('Express server listening on port ' + app.get('port'));
 });
 
-var Task = require('./service/task.js');
+//全局任务调度
+var io = require('socket.io')(server);
+var sockets = [];
 
-Task.on('start', function(task){
-    console.log('start', task);
-})
+var TaskService = require('./service/task.js');
 
-Task.on('complete', function(task){
-    console.log('complete', task);
+function noticeAllTaks(){
+    var tasks = TaskService.getAll();
+
+    sockets.forEach(function(socket){
+        socket.emit('task:update', tasks);
+    });
+}
+
+TaskService.on('add', noticeAllTaks);
+TaskService.on('start', noticeAllTaks);
+TaskService.on('close', noticeAllTaks);
+
+io.on('connection', function(socket){
+    var id = sockets.push(socket) - 1;
+
+    socket.emit('task:update', TaskService.getAll());
+    socket.on('disconnect', function(){
+        sockets.splice(id, 1);
+    });
 });
 
-Task.on('error', function(task){
-    console.log('error', task);
-});
+var RepoService = require('./service/repo.js');
+
+(function(){
+    RepoService.updateBranches();
+    setTimeout(arguments.callee, 10 * 1000);
+})();

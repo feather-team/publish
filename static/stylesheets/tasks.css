@@ -1,0 +1,12 @@
+#tasks-wraper{
+    position: fixed;
+    width: 100%;
+    left: 0px;
+    bottom: 0px;
+    margin-bottom: 0px;
+}
+
+#tasks-wraper .panel-body{
+    height: 300px;
+    overflow: scroll;
+}

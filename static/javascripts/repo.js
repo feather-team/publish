@@ -1,4 +1,4 @@
-var vm = new Vue({
+var RepoView = new Vue({
     el : '#addRepo',
     data : {
         isLoading: false,
@@ -13,7 +13,7 @@ var vm = new Vue({
     },
     methods : {
         fetchRepos : function(){
-            this.$http({url: '/getRepoList',method: 'GET'}).then(function(res){
+            this.$http({url: '/repo/list',method: 'GET'}).then(function(res){
                 if(res.data.code == 0){
                     this.$set('groups',res.data.data);
                 }else{
@@ -28,13 +28,14 @@ var vm = new Vue({
                 if( this.isLoading ) return false;
                 this.$set('isLoading',true);
                 this.$set('repo_btn','Loading...');
-                this.$http.post('/updateRepoList', { 
+                this.$http.post('/repo/add', { 
                     address: this.repo_address
                 }).then(function(res){
                     this.$set('isLoading',false);
                     this.$set('repo_btn','添加仓库');
                     if( res.data.code == 0 ){
                         this.fetchRepos();
+                        this.$set('show_errmsg', false);
                     }else{
                         this.$set('show_errmsg',true);
                         this.$set('repo_errmsg',res.data.msg);

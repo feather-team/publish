@@ -5,20 +5,20 @@ var Repo = module.exports = function(req, res){
 var _ = require('../lib/util.js');
 var RepoService = require('../service/repo.js');
 
-Repo.getRepoList = function(req,res){
+Repo.getList = function(req, res){
     var repos = RepoService.getAllRepos().data;
     var result = {};
 
-    for(var i in repos){
-        var temp = i.split('/');
+    _.map(RepoService.getAllRepos().data, function(item, key){
+        var temp = key.split('/');
         var group = temp[0], name = temp[1];
 
         if(!result[group]){
             result[group] = {};
         }
 
-        result[group][name] = repos[i];
-    }
+        result[group][name] = item;
+    });
 
     res.send({
         code: 0,
@@ -26,10 +26,10 @@ Repo.getRepoList = function(req,res){
     });
 };
 
-function analyseImportantInfo(){
-    var name = content.match(/project\b[^\}]+?name['"]?\s*[,:]\s*['"]([^'"]+)/);
-}
-
-Repo.updateRepoList = function(req, res){
+Repo.add = function(req, res){
     res.send(RepoService.add(req.body.address));
+};
+
+Repo.search = function(req, res){
+    res.send(RepoService.getReposByBranch(req.query.branch));
 };

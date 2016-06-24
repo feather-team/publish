@@ -16,7 +16,7 @@ new Vue({
             if( this.isLoading ) return false;
             this.$set('isLoading',true);
             this.$set('search_btn','Loading...');
-            this.$http.get('/fetchRepo',{branch_name}).then(function(res){
+            this.$http.get('/repo/search',{branch: branch_name}).then(function(res){
                 this.$set('isLoading',false);
                 this.$set('search_btn','查找');
                 if(res.data.code == 0){
