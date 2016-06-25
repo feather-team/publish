@@ -6,6 +6,10 @@
     margin-bottom: 0px;
 }
 
+#tasks-wraper .panel-heading{
+    cursor: pointer;
+}
+
 #tasks-wraper .panel-body{
     height: 300px;
     overflow: scroll;

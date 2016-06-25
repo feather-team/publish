@@ -1,7 +1,7 @@
 var path = require('path'), _ = require('../lib/util.js'), Process = require('../lib/process.js');
 var TaskService = require('./task.js');
 
-var GIT_PATH = path.normalize(__dirname + '/../data/git/');
+var GIT_PATH = exports.PATH = path.normalize(__dirname + '/../data/git/');
 var RepoModel = require('../model/repo.js'), BranchModel = require('../model/branch.js');
 
 function analyseFeatherConfig(file){

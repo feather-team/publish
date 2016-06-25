@@ -5,12 +5,13 @@
     <title>Feather Quick Build</title>
     <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/tasks.css" />
 </head>
 <body>
-    <div class="container">
+    <div class="container header">
         <div class="row">
-            <div class="cols-md-6">feather自动编译系统</div>
-            <div class="cols-md-6">
+            <div class="col-md-6 logo">feather自动编译系统</div>
+            <div class="col-md-6">
                 <ul class="nav nav-pills navs">
                   <li class="active"><a href="/">编译</a></li>
                   <li><a href="/repo">仓库</a></li>
@@ -46,8 +47,28 @@
             <div class="panel-body">{{releaseResult}}</div>
         </div>
     </div>
+
+    <div class="panel panel-primary" id="tasks-wraper">
+        <div class="panel-heading">任务调度列表</div>
+        <div class="panel-body">
+            <ul id="tasks" class="list-group">
+                <template v-for="task in tasks">
+                    <li class="list-group-item list-group-item-{{task.className}}">
+                        <p>描述：{{task.desc}}</p>
+                        <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
+                        <p>状态：{{task.text}}</p>
+                        <p v-if="task.status = 'error'">原因：{{task.errorMsg}}</p>
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </div>
+
     <script src="/bower_components/vue/dist/vue.min.js"></script>
     <script src="/bower_components/vue-resource/dist/vue-resource.min.js"></script>
     <script src="/javascripts/build.js"></script>
+    <script src="/bower_components/jquery/dist/jquery.js"></script>
+    <script src="/javascripts/socket.io.js"></script>
+    <script src="/javascripts/tasks.js"></script>
 </body>
 </html>

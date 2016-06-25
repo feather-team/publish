@@ -1,5 +1,5 @@
 var _ = require('../lib/util.js');
-var TaskService = require('./task.js');
+var TaskService = require('./task.js'), RepoService = require('./repo.js');
 var RepoModel = require('../model/repo.js');
 
 function release(repo, branch){
@@ -28,11 +28,11 @@ exports.release = function(repos, branch){
         }
     });
 
-    var args = ['release.sh', 'd'], txt = [];
+    var args = ['release.sh', branch, RepoService.PATH], txt = [];
 
     _.map(list, function(repos){
         repos.forEach(function(repo){
-            args.push(repo.dir);
+            args.push(repo.factory);
             txt.push(repo.factory);
         });
     });

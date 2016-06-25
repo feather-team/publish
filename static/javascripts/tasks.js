@@ -16,7 +16,19 @@ var TaskView = new Vue({
     },
     
     ready: function(){
-        var self = this, tid;
+        var self = this, tid, sd = false;
+
+        $('#tasks-wraper .panel-heading').click(function(){
+            $('#tasks-wraper .panel-body').toggle(function(){
+                if($(this).is(':visible')){
+                    sd = true;
+                }else{
+                    sd = false;
+                }
+            });
+        });
+
+        $('#tasks-wraper .panel-body').slideUp();
 
         self.io = io.connect('/').on('task:update', function(tasks){
             clearTimeout(tid);
@@ -34,11 +46,11 @@ var TaskView = new Vue({
             });
 
             self.$set('tasks', tasks);
-            $('#tasks-wraper').slideDown();
-            RepoView.fetchRepos();
+            $('#tasks-wraper .panel-body').slideDown();
+            ('RepoView' in window) && RepoView.fetchRepos();
 
             tid = setTimeout(function(){
-                $('#tasks-wraper').slideUp();
+                !sd && $('#tasks-wraper .panel-body').slideUp();
             }, 5000);
         });
     }

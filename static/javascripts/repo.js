@@ -2,7 +2,7 @@ var RepoView = new Vue({
     el : '#addRepo',
     data : {
         isLoading: false,
-        repo_btn: '添加仓库',
+        repo_btn: '添加',
         show_errmsg : false,
         repo_errmsg : '',
         repo_address : '',
@@ -32,7 +32,7 @@ var RepoView = new Vue({
                     address: this.repo_address
                 }).then(function(res){
                     this.$set('isLoading',false);
-                    this.$set('repo_btn','添加仓库');
+                    this.$set('repo_btn','添加');
                     if( res.data.code == 0 ){
                         this.fetchRepos();
                         this.$set('show_errmsg', false);
