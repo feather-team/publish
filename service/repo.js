@@ -40,7 +40,7 @@ exports.add = function(address){
     var key = result.group + '/' + result.name;
 
     if(info = RepoModel.get(key)){
-        if(info.status == 'initializing'){
+        if(info.status == RepoModel.STATUS.INITIALIZING){
             return {
                 code: -1,
                 msg: '仓库等待任务调度或调度ing'
@@ -54,7 +54,7 @@ exports.add = function(address){
     }
 
     result.factory = key;
-    result.status = 'initializing';
+    result.status = RepoModel.STATUS.INITIALIZING;
     result.dir = GIT_PATH + key;
     RepoModel.save(key, result);
 
@@ -68,7 +68,7 @@ exports.add = function(address){
             RepoModel.del(key);
         },
         success: function(){
-            result.status = 'initialized';
+            result.status = RepoModel.STATUS.NORMAL;
 
             var config = result.dir + '/feather_conf.js';
 
@@ -88,9 +88,8 @@ exports.add = function(address){
 };
 
 function updateBranch(repo){
-    if(repo.feather && repo.status == 'initialized'){
+    if(repo.feather && repo.status == RepoModel.STATUS.NORMAL){
         Process({
-            desc: '克隆仓库 [' + repo.factory + ']',
             cmd: 'git',
             args: ['branch', '-r'],
             cwd: repo.dir,
