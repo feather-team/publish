@@ -106,7 +106,7 @@ exports.add = function(address){
 function updateBranch(repo){
     if(repo.fConf && repo.status == 'initialized'){
         Process({
-            desc: '克隆仓库 [' + key + ']',
+            desc: '克隆仓库 [' + repo.factory + ']',
             cmd: 'git',
             args: ['branch', '-r'],
             cwd: repo.dir,
@@ -121,7 +121,7 @@ function updateBranch(repo){
                     }
                 });
 
-                BranchModel.save(key, branches);
+                BranchModel.save(repo.factory, branches);
             } 
         });
     }

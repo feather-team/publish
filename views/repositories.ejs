@@ -48,7 +48,7 @@
                     <li class="list-group-item list-group-item-{{task.className}}">
                         <p>描述：{{task.desc}}</p>
                         <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
-                        <p>状态：任务{{task.text}}</p>
+                        <p>状态：任务{{task.text}} {{task.status == 'error' ? '失败原因：' + task.errorMsg : ''}}</p>
                     </li>
                 </template>
             </ul>

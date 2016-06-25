@@ -8,7 +8,7 @@ Build.release = function(req, res){
     var repos = req.body.reposNames, branch = req.body.fetchName;
     FeatherService.release(repos, branch)
     res.send({
-        code: 1
+        code: 0
     });
 };
 

@@ -28,7 +28,7 @@ exports.release = function(repos, branch){
         }
     });
 
-    var args = [branch], txt = [];
+    var args = ['release.sh', 'd'], txt = [];
 
     _.map(list, function(repos){
         repos.forEach(function(repo){
@@ -39,8 +39,8 @@ exports.release = function(repos, branch){
 
     TaskService.add({
         desc: '编译 [' + txt.join(', ') + '] 仓库的 [' + branch + '] 分支',
-        cmd: './release.sh',
-        cwd: __dirname + 
+        cmd: 'sh',
+        cwd: __dirname + '/../sh',
         args: args,
         error: function(){
             console.log('err', this.errorMsg);
