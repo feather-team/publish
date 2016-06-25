@@ -4,23 +4,6 @@ var TaskService = require('./task.js');
 var GIT_PATH = exports.PATH = path.normalize(__dirname + '/../data/git/');
 var RepoModel = require('../model/repo.js'), BranchModel = require('../model/branch.js');
 
-function analyseFeatherConfig(file){
-    var content = _.read(file), info = {};
-    var name = content.match(/project\b[^\}]+?name['"]?\s*[,:]\s*['"]([^'"]+)/);
-
-    if(name){
-        info.name = name[1];
-    }
-
-    var module = content.match(/project\b[^\}]+?modulename['"]?\s*[,:]\s*['"]([^'"]+)/);
-
-    if(module){
-        info.modulename = module[1];
-    }
-
-    return info;
-}
-
 function analyseAddress(url){
     //获取组名和仓库名
     var REG = /^(?:https?:\/\/[^\/]+\/|git@[^:]+:)([\w-\.]+)\/([\w-\.]+)\.git$/;
@@ -77,6 +60,7 @@ exports.add = function(address){
 
     //do clone
     TaskService.add({
+        desc: '克隆仓库[' + result.factory + ']',
         cmd: 'git',
         args: ['clone', address],
         cwd: GIT_PATH + result.group,
@@ -89,7 +73,7 @@ exports.add = function(address){
             var config = result.dir + '/feather_conf.js';
 
             if(_.exists(config)){    
-                result.fConf = analyseFeatherConfig(config);
+                result.feather = true;
             }
 
             RepoModel.update(key, result);
@@ -104,7 +88,7 @@ exports.add = function(address){
 };
 
 function updateBranch(repo){
-    if(repo.fConf && repo.status == 'initialized'){
+    if(repo.feather && repo.status == 'initialized'){
         Process({
             desc: '克隆仓库 [' + repo.factory + ']',
             cmd: 'git',

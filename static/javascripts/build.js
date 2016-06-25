@@ -21,7 +21,13 @@ new Vue({
                 this.$set('search_btn','查找');
                 if(res.data.code == 0){
                     this.$set('hasRepo',true);
-                    this.$set('repos',res.data.data);   
+                    this.$set('repos',res.data.data); 
+
+                    if(res.data.data.length){
+                        this.$set('show_btn', true);
+                    }else{
+                        this.$set('show_btn', false);
+                    }
                 }else{
                     alert(res.data.message);
                 }
@@ -31,6 +37,7 @@ new Vue({
             if( this.isLoading ) return false;
             this.$set('isLoading',true);
             this.$set('release_btn','Loading...');
+            this.$set('show_errmsg', false);
             this.$http.post('/build/release',{
                 reposNames : this.reposNames,
                 fetchName : this.branch_name
@@ -40,9 +47,11 @@ new Vue({
                 if( res.data.code == 0 ){
 
                 }else{
-                    console.log('repos_names:'+this.reposNames);
-                    this.$set('hasResult',true);
-                    this.$set('releaseResult',res.data.msg);
+                    //console.log('repos_names:'+this.reposNames);
+                    //this.$set('hasResult',true);
+                    //this.$set('releaseResult',res.data.msg);
+                    this.$set('show_errmsg', true);
+                    this.$set('repo_errmsg', res.data.msg);
                 }
             });
         }

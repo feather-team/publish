@@ -63,7 +63,7 @@
                         <p>描述：{{task.desc}}</p>
                         <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
                         <p>状态：任务{{task.text}}</p>
-                        <p v-if="task.status == 'error'">原因：{{task.errorMsg}}</p>
+                        <p v-show="showError">原因：{{task.errorMsg}}</p>
                     </li>
                 </template>
             </ul>

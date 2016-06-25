@@ -5,12 +5,15 @@ function runCommand(){
 
     if [[ $isGit != "" ]]
     then
-        result=`$2 2>&1 | grep -E '^(error|fatal)'`
+        result=`$2 2>&1`
+        hasError=`echo $result | grep -E '(fatal:|error:|CONFLICT|Automatic merge failed)'`
 
-        if [[ $result != "" ]]
+        if [[ $hasError != "" ]]
             then 
                 echo "仓库[$1] ${result}"  >&2
                 exit $?
+            else
+                echo -e "${result}\n"
         fi
     else
         result=`$2`
@@ -19,6 +22,8 @@ function runCommand(){
             then
                 echo "仓库[$1] ${result}"  >&2
                 exit $?
+            else
+                echo -e "${result}\n"
         fi
     fi
 }
@@ -37,5 +42,5 @@ do
     runCommand $arg "git fetch --all"
     runCommand $arg "git checkout ${branch}"
     runCommand $arg "git pull origin ${branch}"
-    runCommand $arg "feather release -opmD -d local"
+    runCommand $arg "feather release -opmD -d build"
 done

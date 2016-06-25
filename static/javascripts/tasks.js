@@ -42,8 +42,18 @@ var TaskView = new Vue({
                     task.text = '等待调度';
                 }
 
+                task.msg = (task.msg || '').replace(/[\r\n]/g, '<br />');
+
+                if(task.status == 'error'){
+                    task.showError = true;
+                }else if(task.status == 'success'){
+                    task.showSuccess = true;
+                }
+
                 return task;
             });
+
+            console.log(tasks);
 
             self.$set('tasks', tasks);
             $('#tasks-wraper .panel-body').slideDown();

@@ -33,3 +33,8 @@ ul{
 .header{
   margin: 10px auto;
 }
+
+.errmsg{
+    margin: 10px 0px;
+    color: red;
+}

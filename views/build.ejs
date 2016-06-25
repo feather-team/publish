@@ -38,14 +38,15 @@
                         <input type="checkbox" v-model="reposNames" id="{{repo}}" value="{{repo}}" /> 
                         {{repo}}&emsp; 
                     </label>             
-                </div><br>
-                <a href="javascript:;" id="releaseBtn" class="btn btn-primary" v-on:click="releaseRepo" v-bind:class="{ 'loading': isLoading }" >{{release_btn}}</a>
+                </div>
+                <p v-show="show_errmsg" class="errmsg">{{repo_errmsg}}</p>
+                <a v-show="show_btn" href="javascript:;" id="releaseBtn" class="btn btn-primary" v-on:click="releaseRepo" v-bind:class="{ 'loading': isLoading }" >{{release_btn}}</a>
             </div>
         </form>
-        <div class="panel panel-info" v-if="hasResult">
+<!--         <div class="panel panel-info" v-if="hasResult">
             <div class="panel-heading">编译结果</div>
             <div class="panel-body">{{releaseResult}}</div>
-        </div>
+        </div> -->
     </div>
 
     <div class="panel panel-primary" id="tasks-wraper">
@@ -57,7 +58,10 @@
                         <p>描述：{{task.desc}}</p>
                         <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
                         <p>状态：{{task.text}}</p>
-                        <p v-if="task.status = 'error'">原因：{{task.errorMsg}}</p>
+                        <p v-show="task.showError">原因：{{task.errorMsg}}</p>
+                        <p v-show="task.showSuccess">
+                        返回：{{{task.msg}}}
+                        </p>
                     </li>
                 </template>
             </ul>

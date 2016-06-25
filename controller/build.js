@@ -6,10 +6,7 @@ var FeatherService = require('../service/feather.js');
 
 Build.release = function(req, res){
     var repos = req.body.reposNames, branch = req.body.fetchName;
-    FeatherService.release(repos, branch)
-    res.send({
-        code: 0
-    });
+    res.send(FeatherService.release(repos, branch));
 };
 
 // Build.releaseRepo = function(req, res) {
