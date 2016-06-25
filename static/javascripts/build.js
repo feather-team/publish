@@ -36,7 +36,7 @@ new Vue({
                 fetchName : this.branch_name
             }).then(function(res){
                 this.$set('isLoading',false);
-                this.$set('search_btn','编译');
+                this.$set('release_btn','编译');
                 if( res.data.code == 0 ){
 
                 }else{

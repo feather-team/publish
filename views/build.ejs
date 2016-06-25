@@ -7,13 +7,24 @@
     <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
 <body>
+    <div class="container">
+        <div class="row">
+            <div class="cols-md-6">feather自动编译系统</div>
+            <div class="cols-md-6">
+                <ul class="nav nav-pills navs">
+                  <li class="active"><a href="/">编译</a></li>
+                  <li><a href="/repo">仓库</a></li>
+                  <li><a href="#">任务</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div class="container" id="build"> 
-        <h3 class="page-header">feather自动编译系统</h3>
         <form action="">
             <div class="form-group">    
-                <label for="">请输入分支名：</label>
                 <div class="input-group">
-                    <input type="text" v-model="branch_name" class="form-control">
+                    <input type="text" v-model="branch_name" placeholder="输入需要编译的仓库分支" class="form-control">
                     <span class="input-group-btn">
                         <button class="btn btn-primary" type="button" v-on:click="fetchRepo" v-bind:class="{ 'loading': isLoading }">{{search_btn}}</button>
                     </span>
