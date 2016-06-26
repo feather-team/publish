@@ -13,8 +13,8 @@ do
     cd $root${arg}
     git reset --hard
     git clean -df
-    runCommand $arg "git fetch --all"
-    runCommand $arg "git checkout ${branch}"
-    runCommand $arg "git pull origin ${branch}"
-    runCommand $arg "feather release -opmD -d build"
+    execCommand $arg "git fetch --all"
+    execCommand $arg "git checkout ${branch}"
+    execCommand $arg "git pull origin ${branch}"
+    execCommand $arg "feather release -opmD -d build"
 done

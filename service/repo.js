@@ -45,20 +45,6 @@ function analyseFeatherConfig(content){
     return info;
 }
 
-function checkModuleExists(modulename){
-    var repos = RepoModel.get();
-
-    for(var i in repos){
-        var repo = repos[i];
-
-        if(repo.feather && repo.config.modulename == modulename){
-            return true;
-        }
-    }
-
-    return false;
-}
-
 exports.getAllRepos = function(){
     return {
         code: 0,
@@ -117,7 +103,7 @@ exports.add = function(address){
                         this.errorMsg = '无法解析feather仓库[' + factory + ']的conf文件';
                         exports.del(factory);
                         break;
-                    }else if(checkModuleExists(config.modulename)){
+                    }else if(RepoModel.getByFeatherConfig({name: config.name, modulename: config.modulename})){
                         this.status = 'error';
                         this.errorMsg = 'feather仓库[' + factory + ']的[' + config.modulename + ']模块已经存在';
                         exports.del(factory);
@@ -188,8 +174,10 @@ exports.getReposByBranch = function(branch){
 };
 
 exports.del = function(repo){
-    if(repo = RepoModel.get(repo)){
-        if(repo.status == RepoModel.STATUS.PROCESSING){
+    var info;
+
+    if(info = RepoModel.get(repo)){
+        if(info.status == RepoModel.STATUS.PROCESSING){
             return {
                 code: -1,
                 msg: '仓库使用中，操作失败'
@@ -199,11 +187,10 @@ exports.del = function(repo){
         RepoModel.del(repo);
         BranchModel.del(repo);
     }
-
+    
     Process({
         cmd: 'rm',
-        args: ['-rf'],
-        cwd: GIT_PATH + repo
+        args: ['-rf', GIT_PATH + repo]
     });
 
     return {

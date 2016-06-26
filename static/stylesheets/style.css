@@ -38,3 +38,7 @@ ul{
     margin: 10px 0px;
     color: red;
 }
+
+.glyphicon{
+  top: 2px;
+}

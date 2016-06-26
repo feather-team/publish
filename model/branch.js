@@ -1,3 +1,3 @@
 var DB = require('../lib/data.js');
 
-module.exports = new DB(__dirname + '/../data/branches.json');
+var Branch = module.exports = new DB(__dirname + '/../data/branches.json');

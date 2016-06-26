@@ -46,6 +46,21 @@ var RepoView = new Vue({
                     console.log(res); 
                 });
             }
+        },
+        delRepo: function(event){
+            var factory = event.target.getAttribute('data-repo');
+
+            if(confirm('确定删除仓库' + factory + '?')){
+                this.$http.post('/repo/del', {
+                    repo: factory
+                }).then(function(res){
+                    if(res.data.code == 0){
+                        this.fetchRepos();
+                    }else{
+                        alert(res.data.msg);
+                    }
+                });
+            }
         }
     }
 });

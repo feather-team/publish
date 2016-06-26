@@ -3,6 +3,13 @@
      cursor: pointer;
      border:0;
  }
+
+.treeview .list-group-item .del{
+    font-size: 12px;
+    margin-left: 20px;
+    text-decoration: none;
+}
+
  .treeview .list-group-inline{
     margin-left: -15px;
  }

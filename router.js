@@ -13,5 +13,6 @@ router.get('/repo', controllers.repo);
 router.get('/repo/list', controllers.repo.getList);
 router.post('/repo/add', controllers.repo.add);
 router.get('/repo/search', controllers.repo.search);
+router.post('/repo/del', controllers.repo.del);
 
 module.exports = router;

@@ -4,36 +4,6 @@ var RepoModel = require('../model/repo.js');
 
 var releasing = false;
 
-function analyseFeatherConfig(repo){
-    var file = repo.dir + '/feather_conf.js';
-    var content = _.read(file), info = {};
-    var name = content.match(/project\b[^\}]+?name['"]?\s*[,:]\s*['"]([^'"]+)/);
-
-    if(name){
-        info.name = name[1];
-    }
-
-    var module = content.match(/project\b[^\}]+?modulename['"]?\s*[,:]\s*['"]([^'"]+)/);
-
-    if(module){
-        info.modulename = module[1];
-    }
-
-    var build = content.match(/deploy\b[^\}]+?build['"]?\s*[,:]\s*(\[[^\]]+\]|\{[^\}]+\})/);
-
-    if(build){
-        try{
-            build = (new Function('return ' + build[1]))();
-        }catch(e){
-            return false;
-        }
-
-        info.build = build;
-    }
-
-    return info;
-}
-
 exports.release = function(repos, branch){
     if(releasing){
         return {
@@ -51,81 +21,115 @@ exports.release = function(repos, branch){
         };
     }
 
-    var list = {};
-    var distList = [];
+    var groups = {};
+    var firstExecs = [], secondExecs = [];
+    var distRepos = [];
 
     for(var i = 0; i < repos.length; i++){
         var repo = RepoModel.get(repos[i]);
-        var config = analyseFeatherConfig(repo);
+        var config = repo.config;
+        var build = _.toArray(repo.config.build);
 
-        if(!config){
-            return {
-                code: -1,
-                msg: '无法解析feather仓库[' + repo.factory + ']的conf文件'
-            }
-        }
+        // for(var j = 0; j < build.length; j++){
+        //     var dist = build[j];
 
-        if(!config.build){
-            return {
-                code: -1,
-                msg: 'feather仓库[' + repo.factory + ']的conf文件中没有配置deploy.build属性'
-            }
-        }
+        //     if(!dist.to){
+        //         return {
+        //             code: -1,
+        //             msg: 'feather仓库[' + repo.factory + ']的deploy.build配置不正确'
+        //         }
+        //     }
 
-        var build = _.toArray(config.build);
+        //     var to = path.resolve(repo.dir, dist.to);
+        //     var sp = to.substring(RepoService.PATH.length);
+        //     var toRepo = RepoModel.get(sp.split('/').slice(0, 2).join('/'));
 
-        for(var j = 0; j < build.length; j++){
-            var dist = build[j];
+        //     if(!toRepo){
+        //         return {
+        //             code: -1,
+        //             msg: 'feather仓库[' + repo.factory + ']的产出目录不存在，请确保对应仓库已成功添加进系统'
+        //         } 
+        //     }
 
-            if(!dist.to){
-                return {
-                    code: -1,
-                    msg: 'feather仓库[' + repo.factory + ']的deploy.build配置不正确'
-                }
-            }
-
-            var to = path.resolve(repo.dir, dist.to);
-            var sp = to.substring(RepoService.PATH.length);
-            // var toRepo = RepoModel.get(sp);
-
-            // if(!toRepo || toRepo.status == 'initializing'){
-            //     return {
-            //         code: -1,
-            //         msg: 'feather仓库[' + repo.factory + ']的产出目录不存在，请确保对应仓库已成功添加进系统'
-            //     } 
-            // }
-
-            distList.push(sp);
-        }
+        //     distRepos.push(toRepo.factory);
+        // }
 
         var name = config.name, mName = config.modulename;
 
-        if(!list[name]){
-            list[name] = [];
+        if(!groups[name]){
+            groups[name] = [];
         }
 
+        groups[name].push(mName);
+
         if(mName == 'common' || !mName){
-            list[name].unshift(repo);
+            firstExecs.push(repo.factory);
         }else{
-            list[name].push(repo);
+            secondExecs.push(repo.factory);
         }
     }
 
-    var args = ['release.sh', branch, RepoService.PATH], txt = [];
+    for(var name in groups){
+        if(groups[name].indexOf('common') == -1){
+            var repo = RepoModel.getByFeatherConfig({
+                name: name,
+                modulename: 'common'
+            });
 
-    _.map(list, function(repos){
-        repos.forEach(function(repo){
-            args.push(repo.factory);
-            txt.push(repo.factory);
+            if(!repo){
+                return {
+                    code: -1,
+                    msg: 'feather项目[' + name + ']的[common]模块不存在，请确保对应仓库已成功添加进系统'
+                };
+            }
+
+            firstExecs.push(repo.factory);
+        }
+    }
+
+    releasing = true;
+
+    release('master', firstExecs, function(isSuccess){
+        if(isSuccess && !_.empty(secondExecs)){
+            release(branch, secondExecs, function(){
+                releasing = false;
+            });
+        }else{
+            releasing = false;
+        }
+    });
+
+    return {
+        code: 0
+    }
+}
+
+function release(branch, repos, complete){
+    repos = _.toArray(repos);
+
+    var count = repos.length, successCount = 0, completeCount = 0;
+
+    repos.forEach(function(repo){
+        RepoModel.update(repo, {
+            status: RepoModel.STATUS.PROCESSING
         });
-    });
 
-    TaskService.add({
-        desc: '编译 [' + txt.join(', ') + '] 仓库的 [' + branch + '] 分支',
-        cmd: 'sh',
-        cwd: __dirname + '/../sh',
-        args: args
-    });
+        var args = ['release.sh', branch, RepoService.PATH, repo];
 
-    return {code: 0};
+        TaskService.add({
+            desc: '编译仓库[' + repo + '] 的 [' + branch + '] 分支',
+            cmd: 'sh',
+            cwd: __dirname + '/../sh',
+            args: args,
+            success: function(){
+                ++successCount;
+            },
+            complete: function(){
+                RepoModel.update(repo, {
+                    status: RepoModel.STATUS.NORMAL
+                });
+                ++completeCount && completeCount == count && complete && complete(successCount == count);
+            }
+        }, true);
+    });
 }
