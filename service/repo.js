@@ -4,6 +4,8 @@ var TaskService = require('./task.js');
 var GIT_PATH = exports.PATH = path.normalize(__dirname + '/../data/git/');
 var RepoModel = require('../model/repo.js'), BranchModel = require('../model/branch.js');
 
+var waitCloneRepo = {};
+
 function analyseAddress(url){
     //获取组名和仓库名
     var REG = /^(?:https?:\/\/[^\/]+\/|git@[^:]+:)([\w-\.]+)\/([\w-\.]+)\.git$/;
@@ -14,6 +16,43 @@ function analyseAddress(url){
             group: matches[1],
             name: matches[2],
             url: url
+        }
+    }
+
+    return false;
+}
+
+function analyseFeatherConfig(content){
+    var name = content.match(/project\b[^\}]+?name['"]?\s*[,:]\s*['"]([^'"]+)/);
+    var module = content.match(/project\b[^\}]+?modulename['"]?\s*[,:]\s*['"]([^'"]+)/);
+    var info = {
+        name: name[1] || '_default',
+        modulename: module[1] || 'common'
+    };
+
+    var build = content.match(/deploy\b[^\}]+?build['"]?\s*[,:]\s*(\[[^\]]+\]|\{[^\}]+\})/);
+
+    if(build){
+        try{
+            build = (new Function('return ' + build[1]))();
+        }catch(e){
+            return false;
+        }
+
+        info.build = build;
+    }
+
+    return info;
+}
+
+function checkModuleExists(modulename){
+    var repos = RepoModel.get();
+
+    for(var i in repos){
+        var repo = repos[i];
+
+        if(repo.feather && repo.config.modulename == modulename){
+            return true;
         }
     }
 
@@ -39,24 +78,23 @@ exports.add = function(address){
 
     var key = result.group + '/' + result.name;
 
+    if(waitCloneRepo.indexOf(key) > -1){
+        return {
+            code: -1,
+            msg: '仓库等待任务调度或调度ing'
+        }
+    }
+
     if(info = RepoModel.get(key)){
-        if(info.status == RepoModel.STATUS.INITIALIZING){
-            return {
-                code: -1,
-                msg: '仓库等待任务调度或调度ing'
-            }
-        }else{
-            return {
-                code: -1,
-                msg: '仓库已存在！'
-            }
+        return {
+            code: -1,
+            msg: '仓库已存在！'
         }
     }
 
     result.factory = key;
-    result.status = RepoModel.STATUS.INITIALIZING;
     result.dir = GIT_PATH + key;
-    RepoModel.save(key, result);
+    waitCloneRepo[key] = true;
 
     //do clone
     TaskService.add({
@@ -64,20 +102,39 @@ exports.add = function(address){
         cmd: 'git',
         args: ['clone', address],
         cwd: GIT_PATH + result.group,
-        error: function(){
-            RepoModel.del(key);
-        },
         success: function(){
             result.status = RepoModel.STATUS.NORMAL;
 
             var config = result.dir + '/feather_conf.js';
 
-            if(_.exists(config)){    
-                result.feather = true;
-            }
+            do{
+                if(_.exists(config)){
+                    result.feather = true;
+                    config = analyseFeatherConfig(_.read(config));
 
-            RepoModel.update(key, result);
-            updateBranch(result);
+                    if(!config){
+                        this.status = 'error';
+                        this.errorMsg = '无法解析feather仓库[' + result.factory + ']的conf文件';
+                        break;
+                    }else if(checkModuleExists(config.modulename)){
+                        this.status = 'error';
+                        this.errorMsg = 'feather仓库[' ++ ']的[' + config.modulename + ']模块已经存在';
+                        break;
+                    }else if(!config.build){
+                        this.status = 'error';
+                        this.errorMsg = 'feather仓库[' + result.factory + ']的conf文件中没有配置deploy.build属性';
+                        break;
+                    }
+
+                    result.config = config;
+                    updateBranch(result);
+                }
+
+                RepoModel.save(key, result);
+            }while(0);
+        },
+        complete: function(){
+            delete waitCloneRepo[key];
         }
     }, true);
          
