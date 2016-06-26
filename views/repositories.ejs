@@ -47,6 +47,7 @@
                             <span class="indent"></span>
                             <span class="icon expand-icon glyphicon glyphicon-file"></span>
                             <span class="icon node-icon"></span>{{ repo.name }}
+                            <a href="javascript:" class="glyphicon glyphicon-remove"></a>
                         </li>
                     </ul>
                 </li>
@@ -63,7 +64,10 @@
                         <p>描述：{{task.desc}}</p>
                         <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
                         <p>状态：任务{{task.text}}</p>
-                        <p v-show="showError">原因：{{task.errorMsg}}</p>
+                        <p v-show="task.showError">原因：{{task.errorMsg}}</p>
+                        <p v-show="task.showSuccess">
+                        返回：{{{task.msg}}}
+                        </p>
                     </li>
                 </template>
             </ul>

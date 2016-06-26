@@ -76,29 +76,29 @@ exports.add = function(address){
         }
     }
 
-    var key = result.group + '/' + result.name;
+    var factory = result.group + '/' + result.name;
 
-    if(waitCloneRepo.indexOf(key) > -1){
+    if(waitCloneRepo[factory]){
         return {
             code: -1,
             msg: '仓库等待任务调度或调度ing'
         }
     }
 
-    if(info = RepoModel.get(key)){
+    if(info = RepoModel.get(factory)){
         return {
             code: -1,
             msg: '仓库已存在！'
         }
     }
 
-    result.factory = key;
-    result.dir = GIT_PATH + key;
-    waitCloneRepo[key] = true;
+    result.factory = factory;
+    result.dir = GIT_PATH + factory;
+    waitCloneRepo[factory] = true;
 
     //do clone
     TaskService.add({
-        desc: '克隆仓库[' + result.factory + ']',
+        desc: '克隆仓库[' + factory + ']',
         cmd: 'git',
         args: ['clone', address],
         cwd: GIT_PATH + result.group,
@@ -114,15 +114,18 @@ exports.add = function(address){
 
                     if(!config){
                         this.status = 'error';
-                        this.errorMsg = '无法解析feather仓库[' + result.factory + ']的conf文件';
+                        this.errorMsg = '无法解析feather仓库[' + factory + ']的conf文件';
+                        exports.del(factory);
                         break;
                     }else if(checkModuleExists(config.modulename)){
                         this.status = 'error';
-                        this.errorMsg = 'feather仓库[' ++ ']的[' + config.modulename + ']模块已经存在';
+                        this.errorMsg = 'feather仓库[' + factory + ']的[' + config.modulename + ']模块已经存在';
+                        exports.del(factory);
                         break;
                     }else if(!config.build){
                         this.status = 'error';
-                        this.errorMsg = 'feather仓库[' + result.factory + ']的conf文件中没有配置deploy.build属性';
+                        this.errorMsg = 'feather仓库[' + factory + ']的conf文件中没有配置deploy.build属性';
+                        exports.del(factory);
                         break;
                     }
 
@@ -130,11 +133,11 @@ exports.add = function(address){
                     updateBranch(result);
                 }
 
-                RepoModel.save(key, result);
+                RepoModel.save(factory, result);
             }while(0);
         },
         complete: function(){
-            delete waitCloneRepo[key];
+            delete waitCloneRepo[factory];
         }
     }, true);
          
@@ -181,5 +184,29 @@ exports.getReposByBranch = function(branch){
     return {
         code: 0,
         data: repos
+    }
+};
+
+exports.del = function(repo){
+    if(repo = RepoModel.get(repo)){
+        if(repo.status == RepoModel.STATUS.PROCESSING){
+            return {
+                code: -1,
+                msg: '仓库使用中，操作失败'
+            }
+        }
+
+        RepoModel.del(repo);
+        BranchModel.del(repo);
+    }
+
+    Process({
+        cmd: 'rm',
+        args: ['-rf'],
+        cwd: GIT_PATH + repo
+    });
+
+    return {
+        code: 0
     }
 };

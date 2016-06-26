@@ -33,3 +33,7 @@ Repo.add = function(req, res){
 Repo.search = function(req, res){
     res.send(RepoService.getReposByBranch(req.query.branch));
 };
+
+Repo.del = function(req, res){
+    res.send(RepoService.del(req.body.repo));
+}
