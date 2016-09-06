@@ -2,7 +2,7 @@
   "name": "publish",
   "version": "1.0.0",
   "scripts": {
-    "start": "npm install & node app.js >> ./access.log &"
+    "start": "node app.js >> ./access.log &"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
