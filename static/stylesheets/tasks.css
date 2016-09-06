@@ -4,6 +4,7 @@
     left: 0px;
     bottom: 0px;
     margin-bottom: 0px;
+    z-index: 1000;
 }
 
 #tasks-wraper .panel-heading{
@@ -11,6 +12,19 @@
 }
 
 #tasks-wraper .panel-body{
-    height: 300px;
+    background: #fff;
+    height: 550px;
     overflow: scroll;
+    transition: height 0.8s;
+    -moz-transition: height 0.8s;
+    -webkit-transition: height 0.8s; 
+}
+
+#tasks-wraper .panel-hidden{
+    padding: 0px;
+    height: 0px;
+}
+
+#tasks-wraper .list-group-item{
+    margin-bottom: 10px;
 }

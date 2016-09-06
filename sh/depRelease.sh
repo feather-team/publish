@@ -21,5 +21,5 @@ do
     execCommand $arg "git pull origin ${branch}"
     execCommand $arg "git submodule init"
     execCommand $arg "git submodule update"
-    execCommand $arg "feather release -opmD -d build"
+    execCommand $arg "feather release -opmD"
 done

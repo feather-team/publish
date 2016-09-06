@@ -1,6 +1,6 @@
 var DB = require('../lib/data.js');
 
-var Repo = module.exports = new DB(__dirname + '/../data/repos.json');
+var Repo = module.exports = new DB(__dirname + '/../data/repos.json'), Branch = require('./branch.js');
 
 Repo.getByFeatherConfig = function(condition){
     var repos = this.get();
@@ -12,6 +12,12 @@ Repo.getByFeatherConfig = function(condition){
             return repo;
         }
     }
+};
+
+Repo.getByBranch = function(branch){
+    return Branch.getIdsByBranch(branch).map(function(id){
+        return Repo.get(id);
+    });
 };
 
 function has(obj1, obj2){

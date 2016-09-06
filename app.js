@@ -7,9 +7,6 @@ var app = express();
 var http = require('http');
 var server = http.Server(app);
 
-PATH = __dirname;
-REPO_PATH = path.resolve(__dirname, 'repos');
-
 // view engine setup
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
@@ -30,32 +27,56 @@ server.listen(app.get('port'),function(){
 var io = require('socket.io')(server);
 var sockets = [];
 
-var TaskService = require('./service/task.js');
+var Task = require('./lib/task.js');
 
-function noticeAllTaks(){
-    var tasks = TaskService.getAll();
+function noticeAllTasks(){
+    var tasks = Task.get();
 
     sockets.forEach(function(socket){
         socket.emit('task:update', tasks);
     });
 }
 
-TaskService.on('add', noticeAllTaks);
-TaskService.on('start', noticeAllTaks);
-TaskService.on('close', noticeAllTaks);
+Task.on('start', noticeAllTasks);
+Task.on('close', noticeAllTasks);
 
 io.on('connection', function(socket){
     var id = sockets.push(socket) - 1;
 
-    socket.emit('task:update', TaskService.getAll());
+    socket.emit('task:update', Task.get());
     socket.on('disconnect', function(){
         sockets.splice(id, 1);
     });
 });
 
-var RepoService = require('./service/repo.js');
+var BranchService = require('./service/branch.js'), RepoService = require('./service/repo.js'), FeatherService = require('./service/feather.js');
+
+RepoService.unlock();
 
 (function(){
-    RepoService.updateBranches();
-    setTimeout(arguments.callee, 10 * 1000);
+    BranchService.updateBranches();
+    setTimeout(arguments.callee, 20 * 1000);
 })();
+
+//正式环境
+if(app.get('env') == 'production'){
+    FeatherService.autoMode(true);
+
+    var time = 1000 * 60 * 60 * 2;
+    //gc
+    setTimeout(function(){
+        Task.gc();
+        setTimeout(arguments.callee, time);
+    }, time);
+}
+
+var Log = require('./lib/log.js');
+
+//程序退出或者crash的一些处理
+process.on('uncaughtException', function(err){
+    Log.error(err);　　
+});
+
+process.on('exit', function(){
+    Log.warn('process exit!');
+});

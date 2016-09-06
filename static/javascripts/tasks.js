@@ -1,5 +1,5 @@
 var TaskView = new Vue({
-    el : '#tasks',
+    el : '#tasks-wraper',
 
     data: {
         STATUS_CLASSNAME: {
@@ -12,23 +12,14 @@ var TaskView = new Vue({
             'processing': '调度中',
             'error': '失败',
             'success': '成功'
-        }
+        },
+
+        manual: false,
+        hidden: true
     },
     
     ready: function(){
-        var self = this, tid, sd = false;
-
-        $('#tasks-wraper .panel-heading').click(function(){
-            $('#tasks-wraper .panel-body').toggle(function(){
-                if($(this).is(':visible')){
-                    sd = true;
-                }else{
-                    sd = false;
-                }
-            });
-        });
-
-        $('#tasks-wraper .panel-body').slideUp();
+        var self = this, tid;
 
         self.io = io.connect('/').on('task:update', function(tasks){
             clearTimeout(tid);
@@ -53,15 +44,35 @@ var TaskView = new Vue({
                 return task;
             });
 
-            console.log(tasks);
-
             self.$set('tasks', tasks);
-            $('#tasks-wraper .panel-body').slideDown();
-            ('RepoView' in window) && RepoView.fetchRepos();
 
-            tid = setTimeout(function(){
-                !sd && $('#tasks-wraper .panel-body').slideUp();
-            }, 5000);
+            if(tasks.length){
+                self.show();
+                ('RepoView' in window) && RepoView.fetchRepos();
+
+                tid = setTimeout(function(){
+                    !self.manual && self.hide();
+                }, 5000);
+            }
         });
+    },
+
+    methods: {
+        toggle: function(){
+            if(this.$get('hidden')){
+                this.show();
+                this.$set('manual', true);
+            }else{
+                this.hide();
+                this.$set('manual', false);
+            }
+        },  
+
+        show: function(){
+            this.$set('hidden', false);
+        },
+        hide: function(){
+            this.$set('hidden', true);
+        }
     }
 });

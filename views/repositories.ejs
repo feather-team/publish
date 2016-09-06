@@ -47,7 +47,7 @@
                             <span class="indent"></span>
                             <span class="icon expand-icon glyphicon glyphicon-file"></span>
                             {{ repo.name }}
-                            <a href="javascript:" v-on:click="delRepo" data-repo="{{repo.factory}}" class="del glyphicon glyphicon-remove"></a>
+                            <a href="javascript:" v-on:click="delRepo" data-repo="{{repo.id}}" class="del glyphicon glyphicon-remove"></a>
                         </li>
                     </ul>
                 </li>
@@ -55,9 +55,9 @@
         </div>
     </div>
 
-    <div class="panel panel-primary" id="tasks-wraper">
-        <div class="panel-heading">任务调度列表</div>
-        <div class="panel-body">
+    <div class="panel panel-primary" id="tasks-wraper" v-show="show" transition="expand">
+        <div class="panel-heading" v-on:click="toggle">任务调度列表</div>
+        <div class="panel-body" v-bind:class="{'panel-hidden': hidden}">
             <ul id="tasks" class="list-group">
                 <template v-for="task in tasks">
                     <li class="list-group-item list-group-item-{{task.className}}">
@@ -77,7 +77,6 @@
     <script src="/bower_components/vue/dist/vue.min.js"></script>
     <script src="/bower_components/vue-resource/dist/vue-resource.min.js"></script>
     <script src="/javascripts/repo.js"></script>
-    <script src="/bower_components/jquery/dist/jquery.js"></script>
     <script src="/javascripts/socket.io.js"></script>
     <script src="/javascripts/tasks.js"></script>
 </body>

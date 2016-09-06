@@ -1,5 +1,6 @@
 body {
   font: 15px "Microsoft Yahei","Helvetica Neue", Helvetica, Arial, sans-serif;
+  padding-bottom: 100px;
 }
 
 a {
@@ -41,4 +42,8 @@ ul{
 
 .glyphicon{
   top: 2px;
+}
+
+p{
+  word-wrap: break-word;
 }

@@ -21,7 +21,7 @@ var git = require('../lib/git.js');
         },
 
         git_list_projects: function (test) {
-            var projectList = datacenter.list_projects('hf-dev-fe');
+            var projectList = datacenter.list_projects('dev-fe');
             test.ok(3,projectList.length);
             test.done();
         },

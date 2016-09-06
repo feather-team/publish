@@ -20,6 +20,8 @@ new Vue({
                 this.$set('isLoading',false);
                 this.$set('search_btn','查找');
                 if(res.data.code == 0){
+                    this.$set('repos', []);
+                    this.$set('reposNames', []);
                     this.$set('hasRepo',true);
                     this.$set('repos',res.data.data); 
 
@@ -29,7 +31,8 @@ new Vue({
                         this.$set('show_btn', false);
                     }
                 }else{
-                    alert(res.data.message);
+                    this.$set('show_errmsg', true);
+                    this.$set('repo_errmsg', res.data.msg);
                 }
             });   
         },

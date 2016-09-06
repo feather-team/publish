@@ -6,10 +6,9 @@ var _ = require('../lib/util.js');
 var RepoService = require('../service/repo.js');
 
 Repo.getList = function(req, res){
-    var repos = RepoService.getAllRepos().data;
     var result = {};
 
-    _.map(RepoService.getAllRepos().data, function(item, key){
+    _.map(RepoService.getRepos().data, function(item, key){
         var temp = key.split('/');
         var group = temp[0], name = temp[1];
 
@@ -31,7 +30,17 @@ Repo.add = function(req, res){
 };
 
 Repo.search = function(req, res){
-    res.send(RepoService.getReposByBranch(req.query.branch));
+    var branch = _.trim(req.query.branch);
+
+    if(!branch){
+        res.send({
+            code: -1,
+            msg: '请输入分支名'
+        });
+        return;
+    }
+
+    res.send(RepoService.getRepos(req.query.branch));
 };
 
 Repo.del = function(req, res){
