@@ -1,0 +1,20 @@
+.treeview .list-group-item {
+  cursor: pointer;
+  border: 0;
+}
+.treeview .list-group-item .del {
+  font-size: 12px;
+  margin-left: 20px;
+  text-decoration: none;
+}
+.treeview .list-group-inline {
+  margin-left: -15px;
+}
+.treeview span.indent {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+.treeview span.icon {
+  width: 12px;
+  margin-right: 5px;
+}

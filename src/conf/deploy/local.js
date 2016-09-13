@@ -1,4 +1,4 @@
 module.exports = {
     from: '/',
-    to: '../dest'  //相对于项目根目录
+    to: '../dist'  //相对于项目根目录
 };

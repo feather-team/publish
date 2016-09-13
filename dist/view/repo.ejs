@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feather Quick Build</title>
+        <link rel="stylesheet" href="/static/c_/bootstrap/css/bootstrap.css" type="text/css" /><link rel="stylesheet" href="/static/style.css" type="text/css" /><link rel="stylesheet" href="/static/w_/header/header.css" type="text/css" /><link rel="stylesheet" href="/static/w_/tasks/tasks.css" type="text/css" /><link rel="stylesheet" href="/static/repos/repos.css" type="text/css" /><script src="/static/feather.js"></script><script src="/static/m_/f8ea355.js"></script></head>
+<body>
+
+<div class="container header">
+    <div class="row">
+        <div class="col-md-6 logo">feather自动编译系统</div>
+        <div class="col-md-6">
+            <ul class="nav nav-pills navs">
+              <li class="active"><a href="/">编译</a></li>
+              <li><a href="/repo">仓库</a></li>
+              <li><a href="#">任务</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<p>123ee</p>
+
+
+        <div class="container" id="addRepo">
+        <form>
+            <div class="form-group">
+                <div class="input-group">
+                    <input type="text" v-model="repo_address" placeholder="输入仓库地址" class="form-control">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button" id="addBtn" v-on:click="addRepo" v-bind:class="{ 'loading': isLoading }" href="javascript:;">{{repo_btn}}</button>
+                    </span>
+                </div>
+            </div>
+            <p v-show="show_errmsg" class="errmsg">{{repo_errmsg}}</p>
+        </form>
+        <h3 class="page-header">仓库列表：</h3>
+        <div class="treeview">
+            <ul class="list-group">
+                <li class="list-group-item" v-for="group in groups">
+                    <span class="icon expand-icon glyphicon glyphicon-object-align-horizontal"></span>
+                    <span class="icon node-icon"></span><b>{{ $key }}</b>
+                    <ul class="list-group-inline">
+                        <li class="list-group-item" v-for="repo in group">
+                            <span class="indent"></span>
+                            <span class="icon expand-icon glyphicon glyphicon-file"></span>
+                            {{ repo.name }}
+                            <a href="javascript:" v-on:click="delRepo" data-repo="{{repo.id}}" class="del glyphicon glyphicon-remove"></a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+    require.async('static/repos/repos.js');
+    </script>
+
+
+<div class="panel panel-primary" id="tasks-wraper" v-show="show" transition="expand">
+    <div class="panel-heading" v-on:click="toggle">任务调度列表</div>
+    <div class="panel-body" v-bind:class="{'panel-hidden': hidden}">
+        <ul id="tasks" class="list-group">
+            <template v-for="task in tasks">
+                <li class="list-group-item list-group-item-{{task.className}}">
+                    <p>描述：{{task.desc}}</p>
+                    <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
+                    <p>状态：任务{{task.text}}</p>
+                    <p v-show="task.showError">原因：{{task.errorMsg}}</p>
+                    <p v-show="task.showSuccess">
+                    返回：{{{task.msg}}}
+                    </p>
+                </li>
+            </template>
+        </ul>
+    </div>
+</div><script>require.async('widget/tasks/tasks.js');</script>
+
+</body>
+</html>

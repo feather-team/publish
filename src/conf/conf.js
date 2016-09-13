@@ -9,4 +9,4 @@ feather.config.merge({
     }
 });
 
-feather.config.set('autoPack.type', 'combo');
+//feather.config.set('autoPack.type', 'combo');

@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="/static/w_/tasks/tasks.css" type="text/css" /><script src="/static/feather.js"></script><script src="/static/m_/c0c0bb3.js"></script><div class="panel panel-primary" id="tasks-wraper" v-show="show" transition="expand">
+    <div class="panel-heading" v-on:click="toggle">任务调度列表</div>
+    <div class="panel-body" v-bind:class="{'panel-hidden': hidden}">
+        <ul id="tasks" class="list-group">
+            <template v-for="task in tasks">
+                <li class="list-group-item list-group-item-{{task.className}}">
+                    <p>描述：{{task.desc}}</p>
+                    <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
+                    <p>状态：任务{{task.text}}</p>
+                    <p v-show="task.showError">原因：{{task.errorMsg}}</p>
+                    <p v-show="task.showSuccess">
+                    返回：{{{task.msg}}}
+                    </p>
+                </li>
+            </template>
+        </ul>
+    </div>
+</div><script>require.async('widget/tasks/tasks.js');</script>
+
+</body>
+</html>
