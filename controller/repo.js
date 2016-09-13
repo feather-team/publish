@@ -1,5 +1,5 @@
 var Repo = module.exports = function(req, res){
-    res.render('repositories');
+    res.render('repo');
 };
 
 var _ = require('../lib/util.js');

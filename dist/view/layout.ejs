@@ -10,15 +10,16 @@
     <div class="row">
         <div class="col-md-6 logo">feather自动编译系统</div>
         <div class="col-md-6">
-            <ul class="nav nav-pills navs">
-              <li class="active"><a href="/">编译</a></li>
-              <li><a href="/repo">仓库</a></li>
-              <li><a href="#">任务</a></li>
-            </ul>
+            <!--BLOCK_START#navs-->
+                <ul class="nav nav-pills navs">
+                    <li class="active"><a href="/">编译</a></li>
+                    <li><a href="/repo">仓库</a></li>
+                    <li><a href="#">任务</a></li>
+                </ul>
+            <!--BLOCK_END-->
         </div>
     </div>
 </div>
-<p>123ee</p>
 <!--BLOCK_START#container--><!--BLOCK_END-->
 <div class="panel panel-primary" id="tasks-wraper" v-show="show" transition="expand">
     <div class="panel-heading" v-on:click="toggle">任务调度列表</div>

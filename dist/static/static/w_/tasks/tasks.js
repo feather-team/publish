@@ -51,7 +51,7 @@ return new Vue({
 
             if(tasks.length){
                 self.show();
-                self.emit('update');
+                self.$emit('update');
 
                 tid = setTimeout(function(){
                     !self.manual && self.hide();

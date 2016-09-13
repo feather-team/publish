@@ -9,7 +9,7 @@ var server = http.Server(app);
 
 // view engine setup
 app.set('port', process.env.PORT || 3000);
-app.set('views', path.join(__dirname, 'dist/views'));
+app.set('views', path.join(__dirname, 'dist/view'));
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.json());
