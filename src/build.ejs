@@ -1,0 +1,38 @@
+<extends "./layout">
+
+<block "container">
+
+    <div class="container" id="build"> 
+        <form action="">
+            <div class="form-group">    
+                <div class="input-group"> 
+                    <input type="text"  v-model="branch_name" v-on:keyup.enter="fetchRepo" placeholder="输入需要编译的仓库分支" class="form-control">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button" v-on:click="fetchRepo" v-bind:class="{ 'loading': isLoading }" >{{search_btn}}</button>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group" v-if="hasRepo">
+                <label for="">请勾选仓库：</label>
+                <div class="checkbox" v-for="repo in repos">
+                    <label for="{{repo.id}}">
+                        <input type="checkbox" v-model="reposNames" id="{{repo.id}}" value="{{repo.id}}" /> 
+                        {{repo.id}}&emsp; 
+                    </label>             
+                </div>
+                <p v-show="show_errmsg" class="errmsg">{{repo_errmsg}}</p>
+                <a v-show="show_btn" href="javascript:;" id="releaseBtn" class="btn btn-primary" v-on:click="releaseRepo" v-bind:class="{ 'loading': isLoading }" >{{release_btn}}</a>
+            </div>
+            <!-- stop auto submit -->
+            <input type="text" style="display:none" />
+        </form>
+    <!--         <div class="panel panel-info" v-if="hasResult">
+            <div class="panel-heading">编译结果</div>
+            <div class="panel-body">{{releaseResult}}</div>
+        </div> -->
+    </div>
+    <script>
+    require.async('static/build/build.js');
+    </script>
+    
+</block>

@@ -1,0 +1,42 @@
+<extends './layout'>
+
+<block 'container'>
+
+    <link rel="stylesheet" type="text/css" href="static/repos/repos.css" />
+
+    <div class="container" id="addRepo">
+        <form>
+            <div class="form-group">
+                <div class="input-group">
+                    <input type="text" v-model="repo_address" placeholder="输入仓库地址" class="form-control">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button" id="addBtn" v-on:click="addRepo" v-bind:class="{ 'loading': isLoading }" href="javascript:;">{{repo_btn}}</button>
+                    </span>
+                </div>
+            </div>
+            <p v-show="show_errmsg" class="errmsg">{{repo_errmsg}}</p>
+        </form>
+        <h3 class="page-header">仓库列表：</h3>
+        <div class="treeview">
+            <ul class="list-group">
+                <li class="list-group-item" v-for="group in groups">
+                    <span class="icon expand-icon glyphicon glyphicon-object-align-horizontal"></span>
+                    <span class="icon node-icon"></span><b>{{ $key }}</b>
+                    <ul class="list-group-inline">
+                        <li class="list-group-item" v-for="repo in group">
+                            <span class="indent"></span>
+                            <span class="icon expand-icon glyphicon glyphicon-file"></span>
+                            {{ repo.name }}
+                            <a href="javascript:" v-on:click="delRepo" data-repo="{{repo.id}}" class="del glyphicon glyphicon-remove"></a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+    require.async('static/repos/repos.js');
+    </script>
+
+</block>

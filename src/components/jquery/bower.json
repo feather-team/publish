@@ -1,0 +1,14 @@
+{
+  "name": "jquery",
+  "main": "jquery.js",
+  "license": "MIT",
+  "ignore": [
+    "package.json"
+  ],
+  "keywords": [
+    "jquery",
+    "javascript",
+    "browser",
+    "library"
+  ]
+}
