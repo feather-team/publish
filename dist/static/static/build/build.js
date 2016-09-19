@@ -20,7 +20,11 @@ new Vue({
             if( this.isLoading ) return false;
             this.$set('isLoading',true);
             this.$set('search_btn','Loading...');
-            this.$http.get('/repo/search',{branch: branch_name}).then(function(res){
+            this.$http.get('/repo/search',{
+                params: {
+                    branch: branch_name
+                }
+            }).then(function(res){
                 return res.json();
             }).then(function(data){
                 this.$set('isLoading',false);
@@ -57,7 +61,7 @@ new Vue({
                 this.$set('release_btn','编译');
                 if( data.code != 0 ){
                     this.$set('show_errmsg', true);
-                    this.$set('repo_errmsg', res.data.msg);
+                    this.$set('repo_errmsg', data.msg);
                 }
             });
         }

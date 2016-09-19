@@ -15,8 +15,7 @@ do
     cd $root${arg}
     echo "当前操作[${arg}]仓库"
     execCommand $arg "git add -A"
-    git commit -m "feather-publish平台自动提交记录：${commitMsg}"
-
+    git commit -m "前端编译平台自动提交记录：${commitMsg}" 2>&1
     branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
 
     if [[ $branchCount -ne 0 ]]

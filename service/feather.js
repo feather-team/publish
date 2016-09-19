@@ -73,7 +73,7 @@ exports.release = function(repos, branch, next){
 
     var result = release(repos, branch, function(){
         releasing = false;
-        next();
+        next && next();
     });
 
     if(result && result.code == -1){
@@ -137,6 +137,7 @@ function release(repos, branch, next){
         }, stop)
         .then(function(info){
             if(info && !info.errorMsg){
+                console.log(info.msg, JSON.stringify(info.msg));
                 return commitTask(branch, JSON.stringify(info.msg), dists);
             }
         }, stop)
@@ -172,18 +173,21 @@ function handleReleases(repos){
             if(!dist.to){
                 return {
                     code: -1,
-                    msg: 'feather仓库[' + repo.id + ']的deploy.build配置不正确'
+                    msg: '仓库[' + repo.id + ']的deploy.build配置不正确'
                 }
             }
 
+            console.log(dist);
             var to = path.resolve(repo.dir, dist.to);
+            console.log(to);
             var toId = to.substring(RepoService.PATH.length).split(path.sep).slice(0, 2).join('/');
+            console.log(toId);
             var toRepo = RepoModel.get(toId);
 
             if(!toRepo){
                 return {
                     code: -1,
-                    msg: 'feather仓库[' + repo.id + ']的产出仓库[' + toId + ']不存在，请确保对应仓库已成功添加进系统'
+                    msg: '仓库[' + repo.id + ']的产出仓库[' + toId + ']不存在，请确保对应仓库已成功添加进系统'
                 } 
             }
 
@@ -233,6 +237,11 @@ function releaseTask(branch, repos, isDeps){
         desc = '编译仓库[' + repos.join(', ') + '] 的 [' + branch + '] 分支'
     }
 
+    repos = repos.map(function(repo){
+        var info = RepoModel.get(repo);
+        return repo + ':' + (info.config.type || 'feather');
+    });
+
     return Task.sh({
         desc: desc,
         cwd: SH_CWD,
@@ -251,7 +260,7 @@ function commitTask(branch, msg, repos){
     return Task.sh({
         desc: '编译完成，提交仓库 [' + repos.join(', ') + '] 的 [' + branch + '] 分支',
         cwd: SH_CWD,
-        args: ['commit.sh', branch, RepoService.PATH, '"' + msg + '"'].concat(repos)
+        args: ['commit.sh', branch, RepoService.PATH, msg].concat(repos)
     });
 }
 

@@ -13,13 +13,22 @@ echo $root
 
 for arg in ${args[@]}
 do            
-    cd $root${arg}
-    echo "当前操作[${arg}]仓库"
+    factory=`echo $arg | cut -d \: -f 1`
+    type=`echo $arg | cut -d \: -f 2`
+
+    cd $root${factory}
+    echo "当前操作[${factory}]仓库"
     git reset --hard
     git clean -df
     execCommand $arg "git checkout ${branch}"
     execCommand $arg "git pull origin ${branch}"
     execCommand $arg "git submodule init"
     execCommand $arg "git submodule update"
-    execCommand $arg "feather release -opmD -d build"
+    
+    if [[ $type != "feather" ]]
+    then
+        execCommand $arg "$type release pd -d build"
+    else
+        execCommand $arg "feather release -opmD -d build"
+    fi
 done

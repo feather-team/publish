@@ -2,7 +2,8 @@
   "name": "publish",
   "version": "1.0.0",
   "scripts": {
-    "start": "node app.js >> ./access.log &"
+    "start": "npm install & node app.js >> ./access.log &",
+    "test": "./node_modules/.bin/nodeunit test"
   },
   "dependencies": {
     "body-parser": "~1.13.2",

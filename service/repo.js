@@ -1,5 +1,5 @@
-var path = require('path'), _ = require('../lib/util.js'), Task = require('../lib/task.js');
-var GIT_PATH = exports.PATH = path.normalize(__dirname + '/../data/git/');
+var Path = require('path'), _ = require('../lib/util.js'), Task = require('../lib/task.js');
+var GIT_PATH = exports.PATH = Path.normalize(__dirname + '/../data/git/');
 
 var RepoModel = require('../model/repo.js'), BranchModel = require('../model/branch.js');
 var BranchService = require('./branch.js');
@@ -23,14 +23,21 @@ function analyseAddress(url){
     return false;
 }
 
-function analyseFeatherConfig(content){
+function analyseProjectConfig(content, _1x){
     var name = content.match(/project\b[^\}]+?name['"]?\s*[,:]\s*['"]([^'"]+)/);
+    var type = content.match(/project\b[^\}]+?type['"]?\s*[,:]\s*['"]([^'"]+)/);
     var module = content.match(/project\b[^\}]+?modulename['"]?\s*[,:]\s*['"]([^'"]+)/);
-    var config = {
+    
+    return config = {
+        type: type ? type[1] : (_1x ? 'feather' : 'feather2'),
         name: name ? name[1] : '_default',
         modulename: module ? module[1] : 'common'
     };
+}
 
+function analyse1xConfig(file){
+    var content = _.read(file);
+    var config = analyseProjectConfig(content, true);
     var build = content.match(/deploy\b[^;$]+?build['"]?\s*[,:]\s*(\[[^\]]+\]|\{[^\}]+\})/);
 
     if(build){
@@ -45,6 +52,19 @@ function analyseFeatherConfig(content){
 
     return config;
 }
+
+function analyse2xConfig(file){
+    var content = _.read(file);
+    var config = analyseProjectConfig(content);
+
+    var deployFile = Path.join(Path.dirname(file), 'deploy/build.js');
+
+    if(_.exists(deployFile)){
+        config.build = require(deployFile);
+    }
+
+    return config;
+};
 
 exports.add = function(address){
     var repo = analyseAddress(address);
@@ -83,27 +103,36 @@ exports.add = function(address){
     }).then(function(info){
         repo.status = RepoModel.STATUS.NORMAL;
 
-        var config = repo.dir + '/feather_conf.js';
-        var sameNameRepo;
+        var config1x = repo.dir + '/feather_conf.js', config2x = repo.dir + '/conf/conf.js';
+        var sameNameRepo, config;
 
         do{
-            if(_.exists(config)){
-                repo.feather = true;
-                config = analyseFeatherConfig(_.read(config));
+            var isFeatherX = true;
 
+            if(_.exists(config1x)){
+                repo.feather = true;
+                config = analyse1xConfig(config1x);
+            }else if(_.exists(config2x)){
+                repo.feather = true;
+                config = analyse2xConfig(config2x);
+            }else{
+                isFeatherX = false;
+            }
+
+            if(isFeatherX){
                 if(!config){
                     info.status = 'error';
-                    info.errorMsg = '无法解析feather仓库[' + id + ']的conf文件';
+                    info.errorMsg = '无法解析仓库[' + id + ']的conf文件';
                     exports.del(id);
                     break;
                 }else if(sameNameRepo = RepoModel.getByFeatherConfig({name: config.name, modulename: config.modulename})){
                     info.status = 'error';
-                    info.errorMsg = 'feather仓库[' + id + ']的[' + config.modulename + ']模块已经存在，已存在仓库名 [' + sameNameRepo.id + ']';
+                    info.errorMsg = '项目[' + config.name + ']已存在[' + config.modulename + ']模块，仓库名[' + sameNameRepo.id + ']';
                     exports.del(id);
                     break;
                 }else if(!config.build){
                     info.status = 'error';
-                    info.errorMsg = 'feather仓库[' + id + ']的conf文件中没有配置deploy.build属性';
+                    info.errorMsg = '仓库[' + id + ']的conf文件中没有配置deploy.build属性';
                     exports.del(id);
                     break;
                 }
@@ -135,8 +164,7 @@ exports.del = function(id){
             return {
                 code: -1,
                 msg: '仓库使用中，操作失败'
-            }
-            
+            }   
         }
 
         RepoModel.del(id);
