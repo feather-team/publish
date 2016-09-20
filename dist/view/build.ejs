@@ -1,3 +1,80 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Feather Quick Build</title><link rel="stylesheet" href="/combo?static/c_/bootstrap/css/bootstrap_57fde5d.css&static/style_0b0f072.css&static/w_/header/header_a36363d.css&static/w_/tasks/tasks_cac606e.css" type="text/css" /><script src="/static/feather_d2cdcd1.js"></script><script src="/static/m_/094e347_156b420.js"></script></head><body><div class="container header"><div class="row"><div class="col-md-6 logo">feather自动编译系统</div><div class="col-md-6"><ul class="nav nav-pills navs"><li class="active"><a href="/">编译</a></li><li><a href="/repo">仓库</a></li><li><a href="#">任务</a></li></ul></div></div></div><div class="container" id="build"><form action=""><div class="form-group"><div class="input-group"><input type="text"  v-model="branch_name" v-on:keyup.enter="fetchRepo" placeholder="输入需要编译的仓库分支" class="form-control"><span class="input-group-btn"><button class="btn btn-primary" type="button" v-on:click="fetchRepo" v-bind:class="{ 'loading': isLoading }" >{{search_btn}}</button></span></div></div><div class="form-group" v-if="hasRepo"><label for="">请勾选仓库：</label><div class="checkbox" v-for="repo in repos"><label for="{{repo.id}}"><input type="checkbox" v-model="reposNames" id="{{repo.id}}" value="{{repo.id}}" />{{repo.id}}&emsp;</label></div><p v-show="show_errmsg" class="errmsg">{{repo_errmsg}}</p><a v-show="show_btn" href="javascript:;" id="releaseBtn" class="btn btn-primary" v-on:click="releaseRepo" v-bind:class="{ 'loading': isLoading }" >{{release_btn}}</a></div><input type="text" style="display:none" /></form></div><script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feather Quick Build</title>
+        <link rel="stylesheet" href="/static/c_/bootstrap/css/bootstrap.css" type="text/css" /><link rel="stylesheet" href="/static/style.css" type="text/css" /><link rel="stylesheet" href="/static/w_/header/header.css" type="text/css" /><link rel="stylesheet" href="/static/w_/tasks/tasks.css" type="text/css" /><script src="/static/feather.js"></script><script src="/static/m_/094e347.js"></script></head>
+<body>
+
+<div class="container header">
+    <div class="row">
+        <div class="col-md-6 logo">feather自动编译系统</div>
+        <div class="col-md-6">
+            <!--BLOCK_START#navs-->
+                <ul class="nav nav-pills navs">
+                    <li class="active"><a href="/">编译</a></li>
+                    <li><a href="/repo">仓库</a></li>
+                    <li><a href="#">任务</a></li>
+                </ul>
+            <!--BLOCK_END-->
+        </div>
+    </div>
+</div>
+
+
+    <div class="container" id="build"> 
+        <form action="">
+            <div class="form-group">    
+                <div class="input-group"> 
+                    <input type="text"  v-model="branch_name" v-on:keyup.enter="fetchRepo" placeholder="输入需要编译的仓库分支" class="form-control">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button" v-on:click="fetchRepo" v-bind:class="{ 'loading': isLoading }" >{{search_btn}}</button>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group" v-if="hasRepo">
+                <label for="">请勾选仓库：</label>
+                <div class="checkbox" v-for="repo in repos">
+                    <label for="{{repo.id}}">
+                        <input type="checkbox" v-model="reposNames" id="{{repo.id}}" value="{{repo.id}}" /> 
+                        {{repo.id}}&emsp; 
+                    </label>             
+                </div>
+                <p v-show="show_errmsg" class="errmsg">{{repo_errmsg}}</p>
+                <a v-show="show_btn" href="javascript:;" id="releaseBtn" class="btn btn-primary" v-on:click="releaseRepo" v-bind:class="{ 'loading': isLoading }" >{{release_btn}}</a>
+            </div>
+            <!-- stop auto submit -->
+            <input type="text" style="display:none" />
+        </form>
+    <!--         <div class="panel panel-info" v-if="hasResult">
+            <div class="panel-heading">编译结果</div>
+            <div class="panel-body">{{releaseResult}}</div>
+        </div> -->
+    </div>
+    <script>
     require.async('static/build/build.js');
-    </script><div class="panel panel-primary" id="tasks-wraper" v-show="show" transition="expand"><div class="panel-heading" v-on:click="toggle">任务调度列表</div><div class="panel-body" v-bind:class="{'panel-hidden': hidden}"><ul id="tasks" class="list-group"><template v-for="task in tasks"><li class="list-group-item list-group-item-{{task.className}}"><p>描述：{{task.desc}}</p><p>命令：{{task.cmd}} {{task.args.join(' ')}}</p><p>执行时间：{{task.startTime}} ~ {{task.closeTime}}</p><p>状态：任务{{task.text}}</p><p v-show="task.showError">原因：{{task.errorMsg}}</p><p v-show="task.showSuccess">返回：{{{task.msg}}}</p></li></template></ul></div></div><script>require.async('widget/tasks/tasks.js');</script></body></html>
+    </script>
+    
+
+<div class="panel panel-primary" id="tasks-wraper" v-show="show" transition="expand">
+    <div class="panel-heading" v-on:click="toggle">任务调度列表</div>
+    <div class="panel-body" v-bind:class="{'panel-hidden': hidden}">
+        <ul id="tasks" class="list-group">
+            <template v-for="task in tasks">
+                <li class="list-group-item list-group-item-{{task.className}}">
+                    <p>描述：{{task.desc}}</p>
+                    <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
+                    <p>执行时间：{{task.startTime}} ~ {{task.closeTime}}</p>
+                    <p>状态：任务{{task.text}}</p>
+                    <p v-show="task.showError">原因：{{task.errorMsg}}</p>
+                    <p v-show="task.showSuccess">
+                    返回：{{{task.msg}}}
+                    </p>
+                </li>
+            </template>
+        </ul>
+    </div>
+</div><script>require.async('widget/tasks/tasks.js');</script>
+
+</body>
+</html>
