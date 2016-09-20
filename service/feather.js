@@ -1,9 +1,55 @@
-var _ = require('../lib/util.js'), path = require('path'), Task = require('../lib/task.js'), Q = require('q'), Log = require('../lib/log.js');
+var _ = require('../lib/util.js'), Path = require('path'), Task = require('../lib/task.js'), Q = require('q'), Log = require('../lib/log.js');
 var RepoService = require('./repo.js');
 var RepoModel = require('../model/repo.js');
 var SH_CWD = __dirname + '/../sh';
 
 var releasing = false, autoMode_ = false, autoReleasing = false, waits = [];
+
+function getFeatherDeployConfig(info, branch){
+    var type = info.config.type || 'feather';
+    var deploy = getDeployTypeByBranch(type, branch);
+
+    if(!deploy){
+        return false;
+    }
+
+    var file;
+
+    if(type == 'feather'){
+        file = info.dir + '/feather_conf.js';
+    }else{
+        file = info.dir + '/conf/conf.js';
+    }
+
+    var content = _.read(file);
+    var config = content.match(new RegExp('deploy\\b[^;$]+?' + deploy + '[\'"]?\\s*[,:]\\s*(\\[[^\\]]+\\]|\\{[^\\}]+\\})'));
+
+    if(config){
+        try{
+            return (new Function('return ' + config[1]))();
+        }catch(e){
+            return false;
+        }
+    }else if(type != 'feather'){
+        file = Path.normalize(info.dir + '/conf/deploy/' + deploy + '.js');
+
+        try{
+            if(_.exists(file)){
+                delete require.cache[file];
+                return require(file);
+            }
+        }catch(e){
+            return false;
+        }
+    }
+
+    return false;
+}
+
+function getDeployTypeByBranch(type, branch){
+    var config = Application.get('config').deploy[type || 'feather'];
+    return config[branch] || config['*'];
+}
 
 exports.autoMode = function(state){
     autoMode_ = state;
@@ -84,7 +130,7 @@ exports.release = function(repos, branch, next){
 }
 
 function release(repos, branch, next){
-    var releases = handleReleases(_.toArray(repos));
+    var releases = handleReleases(_.toArray(repos), branch);
 
     if(releases.code == -1){
         next && next();
@@ -137,14 +183,13 @@ function release(repos, branch, next){
         }, stop)
         .then(function(info){
             if(info && !info.errorMsg){
-                console.log(info.msg, JSON.stringify(info.msg));
                 return commitTask(branch, JSON.stringify(info.msg), dists);
             }
         }, stop)
         .then(stop, stop);
 }
 
-function handleReleases(repos){
+function handleReleases(repos, branch){
     var groups = {};
     var depReleases = [], finalReleases = [], distRepos = [];
 
@@ -165,7 +210,8 @@ function handleReleases(repos){
             finalReleases.push(repo.id);
         }
 
-        var dists = _.toArray(repo.config.build);
+        var deploy = getFeatherDeployConfig(repo, branch);
+        var dists = _.toArray(deploy);
 
         for(var j = 0; j < dists.length; j++){
             var dist = dists[j];
@@ -173,15 +219,12 @@ function handleReleases(repos){
             if(!dist.to){
                 return {
                     code: -1,
-                    msg: '仓库[' + repo.id + ']的deploy.build配置不正确'
+                    msg: '仓库[' + repo.id + ']的deploy.' + getDeployTypeByBranch(repo.config.type, branch) + '配置不正确'
                 }
             }
 
-            console.log(dist);
-            var to = path.resolve(repo.dir, dist.to);
-            console.log(to);
-            var toId = to.substring(RepoService.PATH.length).split(path.sep).slice(0, 2).join('/');
-            console.log(toId);
+            var to = Path.resolve(repo.dir, dist.to);
+            var toId = to.substring(RepoService.PATH.length).split(Path.sep).slice(0, 2).join('/');
             var toRepo = RepoModel.get(toId);
 
             if(!toRepo){
@@ -239,7 +282,9 @@ function releaseTask(branch, repos, isDeps){
 
     repos = repos.map(function(repo){
         var info = RepoModel.get(repo);
-        return repo + ':' + (info.config.type || 'feather');
+        var type = info.config.type || 'feather';
+        var deploy = getDeployTypeByBranch(type, branch);
+        return repo + ':' + type + ':' + deploy;
     });
 
     return Task.sh({

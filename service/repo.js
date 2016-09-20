@@ -23,7 +23,8 @@ function analyseAddress(url){
     return false;
 }
 
-function analyseProjectConfig(content, _1x){
+function analyseProjectConfig(file, _1x){
+    var content = _.read(file);
     var name = content.match(/project\b[^\}]+?name['"]?\s*[,:]\s*['"]([^'"]+)/);
     var type = content.match(/project\b[^\}]+?type['"]?\s*[,:]\s*['"]([^'"]+)/);
     var module = content.match(/project\b[^\}]+?modulename['"]?\s*[,:]\s*['"]([^'"]+)/);
@@ -34,37 +35,6 @@ function analyseProjectConfig(content, _1x){
         modulename: module ? module[1] : 'common'
     };
 }
-
-function analyse1xConfig(file){
-    var content = _.read(file);
-    var config = analyseProjectConfig(content, true);
-    var build = content.match(/deploy\b[^;$]+?build['"]?\s*[,:]\s*(\[[^\]]+\]|\{[^\}]+\})/);
-
-    if(build){
-        try{
-            build = (new Function('return ' + build[1]))();
-        }catch(e){
-            return false;
-        }
-
-        config.build = build;
-    }
-
-    return config;
-}
-
-function analyse2xConfig(file){
-    var content = _.read(file);
-    var config = analyseProjectConfig(content);
-
-    var deployFile = Path.join(Path.dirname(file), 'deploy/build.js');
-
-    if(_.exists(deployFile)){
-        config.build = require(deployFile);
-    }
-
-    return config;
-};
 
 exports.add = function(address){
     var repo = analyseAddress(address);
@@ -111,10 +81,10 @@ exports.add = function(address){
 
             if(_.exists(config1x)){
                 repo.feather = true;
-                config = analyse1xConfig(config1x);
+                config = analyseProjectConfig(config1x);
             }else if(_.exists(config2x)){
                 repo.feather = true;
-                config = analyse2xConfig(config2x);
+                config = analyseProjectConfig(config2x, true);
             }else{
                 isFeatherX = false;
             }
@@ -130,9 +100,9 @@ exports.add = function(address){
                     info.errorMsg = '项目[' + config.name + ']已存在[' + config.modulename + ']模块，仓库名[' + sameNameRepo.id + ']';
                     exports.del(id);
                     break;
-                }else if(!config.build){
+                }else if(!config.type){
                     info.status = 'error';
-                    info.errorMsg = '仓库[' + id + ']的conf文件中没有配置deploy.build属性';
+                    info.errorMsg = '项目[' + config.name + ']的type为空，请设置具体type[feather2,lothar,feather]';
                     exports.del(id);
                     break;
                 }

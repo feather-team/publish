@@ -15,6 +15,7 @@ for arg in ${args[@]}
 do            
     factory=`echo $arg | cut -d \: -f 1`
     type=`echo $arg | cut -d \: -f 2`
+    deploy=`echo $arg | cut -d \: -f 3`
 
     cd $root${factory}
     echo "当前操作[${factory}]仓库"
@@ -27,8 +28,9 @@ do
     
     if [[ $type != "feather" ]]
     then
-        execCommand $arg "$type release pd -d build"
+        echo "$type release pd -d $deploy"
+        execCommand $arg "$type release pd -d $deploy"
     else
-        execCommand $arg "feather release -opmD -d build"
+        execCommand $arg "feather release -opmD -d $deploy"
     fi
 done

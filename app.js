@@ -2,10 +2,13 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var _ = require('./lib/util.js');
 
-var app = express();
+var app = global.Application = express();
 var http = require('http');
 var server = http.Server(app);
+
+app.set('config', require(path.join(__dirname, 'config.js')));
 
 // view engine setup
 app.set('port', process.env.PORT || 3000);
