@@ -6,6 +6,7 @@
                 <li class="list-group-item list-group-item-{{task.className}}">
                     <p>描述：{{task.desc}}</p>
                     <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
+                    <p>执行时间：{{task.startTime}} ~ {{task.closeTime}}</p>
                     <p>状态：任务{{task.text}}</p>
                     <p v-show="task.showError">原因：{{task.errorMsg}}</p>
                     <p v-show="task.showSuccess">

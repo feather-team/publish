@@ -43,6 +43,14 @@ return new Vue({
                     task.showSuccess = true;
                 }
 
+                var startTime = new Date;
+                startTime.setTime(task.startTime);
+                task.startTime = startTime.toString();
+
+                var closeTime = new Date;
+                closeTime.setTime(task.closeTime);
+                task.closeTime = closeTime.toString();
+
                 return task;
             });
 

@@ -1,0 +1,1 @@
+#tasks-wraper{position:fixed;width:100%;left:0;bottom:0;margin-bottom:0;z-index:1000}#tasks-wraper .panel-heading{cursor:pointer}#tasks-wraper .panel-body{background:#fff;height:550px;overflow:scroll;transition:height .8s;-moz-transition:height .8s;-webkit-transition:height .8s}#tasks-wraper .panel-hidden{padding:0;height:0}#tasks-wraper .list-group-item{margin-bottom:10px}

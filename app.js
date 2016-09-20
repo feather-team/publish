@@ -17,6 +17,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'dist/static')));
 
+//static combo
+var combo = require('combohandler');
+app.get('/combo', combo.combine({
+    rootPath: __dirname + '/dist/static'
+}), combo.respond);
+
 app.use(require('./router.js'));
 
 server.listen(app.get('port'),function(){
@@ -43,7 +49,7 @@ Task.on('close', noticeAllTasks);
 io.on('connection', function(socket){
     var id = sockets.push(socket) - 1;
 
-    socket.emit('task:update', Task.get());
+    socket.emit('task:update', Task.get(30));
     socket.on('disconnect', function(){
         sockets.splice(id, 1);
     });
