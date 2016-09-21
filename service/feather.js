@@ -110,6 +110,13 @@ exports.release = function(repos, branch, next){
     releasing = true;
     
     if(autoMode_){
+        var check = handleReleases(_.toArray(repos), branch);
+        
+        if(check.code == -1){
+            releasing = false;
+            return check;
+        }
+
         exports.addTask(repos, branch, true);
         return {
             code: -1,
@@ -211,6 +218,15 @@ function handleReleases(repos, branch){
         }
 
         var deploy = getFeatherDeployConfig(repo, branch);
+        var deployName = getDeployTypeByBranch(repo.config.type, branch);
+
+        if(!deploy){
+            return {
+                code: -1,
+                msg: '仓库[' + repo.id + ']的deploy.' + deployName + '配置不存在'
+            }
+        }
+
         var dists = _.toArray(deploy);
 
         for(var j = 0; j < dists.length; j++){
@@ -219,7 +235,7 @@ function handleReleases(repos, branch){
             if(!dist.to){
                 return {
                     code: -1,
-                    msg: '仓库[' + repo.id + ']的deploy.' + getDeployTypeByBranch(repo.config.type, branch) + '配置不正确'
+                    msg: '仓库[' + repo.id + ']的deploy.' + deployName + '配置不正确'
                 }
             }
 
