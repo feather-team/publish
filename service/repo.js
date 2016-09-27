@@ -81,10 +81,10 @@ exports.add = function(address){
 
             if(_.exists(config1x)){
                 repo.feather = true;
-                config = analyseProjectConfig(config1x);
+                config = analyseProjectConfig(config1x, true);
             }else if(_.exists(config2x)){
                 repo.feather = true;
-                config = analyseProjectConfig(config2x, true);
+                config = analyseProjectConfig(config2x);
             }else{
                 isFeatherX = false;
             }
