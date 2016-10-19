@@ -202,20 +202,21 @@ function handleReleases(repos, branch){
 
     for(var i = 0; i < repos.length; i++){
         var repo = RepoModel.get(repos[i]);
-        var config = repo.config;
-        var name = config.name, mName = config.modulename;
+        var configs = _.toArray(repo.config);
 
-        if(!groups[name]){
-            groups[name] = [];
-        }
+        // var name = config.name, mName = config.modulename;
 
-        groups[name].push(mName);
+        // if(!groups[name]){
+        //     groups[name] = [];
+        // }
 
-        if(mName == 'common' || !mName){
-            finalReleases.unshift(repo.id);
-        }else{
-            finalReleases.push(repo.id);
-        }
+        // groups[name].push(mName);
+
+        // if(mName == 'common' || !mName){
+        //     finalReleases.unshift(repo.id);
+        // }else{
+        //     finalReleases.push(repo.id);
+        // }
 
         var deploy = getFeatherDeployConfig(repo, branch);
         var deployName = getDeployTypeByBranch(repo.config.type, branch);
@@ -227,32 +228,34 @@ function handleReleases(repos, branch){
             }
         }
 
-        var dists = _.toArray(deploy);
+        // var dists = _.toArray(deploy);
 
-        for(var j = 0; j < dists.length; j++){
-            var dist = dists[j];
+        // for(var j = 0; j < dists.length; j++){
+        //     var dist = dists[j];
 
-            if(!dist.to){
-                return {
-                    code: -1,
-                    msg: '仓库[' + repo.id + ']的deploy.' + deployName + '配置不正确'
-                }
-            }
+        //     if(!dist.to){
+        //         return {
+        //             code: -1,
+        //             msg: '仓库[' + repo.id + ']的deploy.' + deployName + '配置不正确'
+        //         }
+        //     }
 
-            var to = Path.resolve(repo.dir, dist.to);
-            var toId = to.substring(RepoService.PATH.length).split(Path.sep).slice(0, 2).join('/');
-            var toRepo = RepoModel.get(toId);
+        //     var to = Path.resolve(repo.dir, dist.to);
+        //     var toId = to.substring(RepoService.PATH.length).split(Path.sep).slice(0, 2).join('/');
+        //     var toRepo = RepoModel.get(toId);
 
-            if(!toRepo){
-                return {
-                    code: -1,
-                    msg: '仓库[' + repo.id + ']的产出仓库[' + toId + ']不存在，请确保对应仓库已成功添加进系统'
-                } 
-            }
+        //     if(!toRepo){
+        //         return {
+        //             code: -1,
+        //             msg: '仓库[' + repo.id + ']的产出仓库[' + toId + ']不存在，请确保对应仓库已成功添加进系统'
+        //         } 
+        //     }
 
-            distRepos.push(toRepo.id);
-        }
+        //     distRepos.push(toRepo.id);
+        // }
     }
+
+    return ;
 
     for(var name in groups){
         if(groups[name].indexOf('common') == -1){

@@ -1,6 +1,6 @@
 var path = require('path'), _ = require('../lib/util.js'), Task = require('../lib/task.js'), Log = require('../lib/log.js');
 var RepoModel = require('../model/repo.js'), BranchModel = require('../model/branch.js');
-var FeatherService = require('./feather.js');
+var ReleaseService = require('./release.js');
 
 exports.updateBranch = function(repo){
     if(repo.feather && repo.status == RepoModel.STATUS.NORMAL){
@@ -18,7 +18,7 @@ exports.updateBranch = function(repo){
                     line = line.split(' -> ');
 
                     if(line.length > 1){
-                        FeatherService.addTask(repo.id, line[1].split('/')[1]);
+                        ReleaseService.addTask(repo.id, line[1].split('/')[1]);
                     }
                 });
             }

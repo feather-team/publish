@@ -58,7 +58,7 @@ io.on('connection', function(socket){
     });
 });
 
-var BranchService = require('./service/branch.js'), RepoService = require('./service/repo.js'), FeatherService = require('./service/feather.js');
+var BranchService = require('./service/branch.js'), RepoService = require('./service/repo.js'), ReleaseService = require('./service/release.js');
 
 RepoService.unlock();
 
@@ -67,9 +67,11 @@ RepoService.unlock();
     setTimeout(arguments.callee, 20 * 1000);
 })();
 
+var Log = require('./lib/log.js');
+
 //正式环境
 if(app.get('env') == 'production'){
-    FeatherService.autoMode(true);
+    ReleaseService.autoMode(true);
 
     var time = 1000 * 60 * 60 * 2;
     //gc
@@ -77,15 +79,13 @@ if(app.get('env') == 'production'){
         Task.gc();
         setTimeout(arguments.callee, time);
     }, time);
+
+    //程序退出或者crash的一些处理
+    process.on('uncaughtException', function(err){
+        Log.error(err);　　
+    });
+
+    process.on('exit', function(){
+        Log.warn('process exit!');
+    });
 }
-
-var Log = require('./lib/log.js');
-
-//程序退出或者crash的一些处理
-process.on('uncaughtException', function(err){
-    Log.error(err);　　
-});
-
-process.on('exit', function(){
-    Log.warn('process exit!');
-});

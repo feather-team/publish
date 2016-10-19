@@ -1,6 +1,6 @@
 var DB = require('../lib/data.js');
-
 var Repo = module.exports = new DB(__dirname + '/../data/repos.json'), Branch = require('./branch.js');
+var _ = require('../lib/util.js');
 
 Repo.getByFeatherConfig = function(condition){
     var repos = this.get();
@@ -21,16 +21,19 @@ Repo.getByBranch = function(branch){
 };
 
 function has(obj1, obj2){
-    for(var i in obj2){
-        if(obj1[i] != obj2[i]){
-            return false;
+    return _.toArray(obj1).some(function(config){
+        for(var i in obj2){
+            if(config[i] != obj2[i]){
+                return false;
+            }
         }
-    }
 
-    return true;
+        return true;
+    });
 }
 
 Repo.STATUS = {
     NORMAL: 1,
-    PROCESSING: 2
+    PROCESSING: 2,
+    ERROR: 3
 };

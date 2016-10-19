@@ -2,8 +2,7 @@ var Path = require('path'), _ = require('../lib/util.js'), Task = require('../li
 var GIT_PATH = exports.PATH = Path.normalize(__dirname + '/../data/git/');
 
 var RepoModel = require('../model/repo.js'), BranchModel = require('../model/branch.js');
-var BranchService = require('./branch.js');
-
+var BranchService = require('./branch.js'), ProjectService = require('./project.js');
 var waitCloneRepo = {};
 
 function analyseAddress(url){
@@ -23,43 +22,23 @@ function analyseAddress(url){
     return false;
 }
 
-function analyseProjectConfig(file, _1x){
-    var content = _.read(file);
-    var name = content.match(/project\b[^\}]+?name['"]?\s*[,:]\s*['"]([^'"]+)/);
-    var type = content.match(/project\b[^\}]+?type['"]?\s*[,:]\s*['"]([^'"]+)/);
-    var module = content.match(/project\b[^\}]+?modulename['"]?\s*[,:]\s*['"]([^'"]+)/);
-    
-    return config = {
-        type: type ? type[1] : (_1x ? 'feather' : 'feather2'),
-        name: name ? name[1] : '_default',
-        modulename: module ? module[1] : 'common'
-    };
-}
+var Repo = module.exports = _.extend({}, require('./common.js'));
 
-exports.add = function(address){
+Repo.add = function(address){
     var repo = analyseAddress(address);
 
     if(!repo){
-        return {
-            code: -1, 
-            msg: '仓库路径不对，请填写正确的仓库路径！'
-        }
+        return this.error('仓库路径不对，请填写正确的仓库路径！');
     }
 
     var id = repo.id;
 
     if(waitCloneRepo[id]){
-        return {
-            code: -1,
-            msg: '仓库等待任务调度或调度ing'
-        }
+        return this.error('仓库等待任务调度或调度ing');
     }
 
     if(RepoModel.get(id)){
-        return {
-            code: -1,
-            msg: '仓库已存在！'
-        }
+        return this.error('仓库已存在！');
     }
 
     repo.dir = GIT_PATH + id;
@@ -72,69 +51,50 @@ exports.add = function(address){
         cwd: GIT_PATH + repo.group
     }).then(function(info){
         repo.status = RepoModel.STATUS.NORMAL;
-
-        var config1x = repo.dir + '/feather_conf.js', config2x = repo.dir + '/conf/conf.js';
-        var sameNameRepo, config;
-
-        do{
-            var isFeatherX = true;
-
-            if(_.exists(config1x)){
-                repo.feather = true;
-                config = analyseProjectConfig(config1x, true);
-            }else if(_.exists(config2x)){
-                repo.feather = true;
-                config = analyseProjectConfig(config2x);
-            }else{
-                isFeatherX = false;
-            }
-
-            if(isFeatherX){
-                if(!config){
-                    info.status = 'error';
-                    info.errorMsg = '无法解析仓库[' + id + ']的conf文件';
-                    exports.del(id);
-                    break;
-                }else if(sameNameRepo = RepoModel.getByFeatherConfig({name: config.name, modulename: config.modulename})){
-                    info.status = 'error';
-                    info.errorMsg = '项目[' + config.name + ']已存在[' + config.modulename + ']模块，仓库名[' + sameNameRepo.id + ']';
-                    exports.del(id);
-                    break;
-                }else if(!config.type){
-                    info.status = 'error';
-                    info.errorMsg = '项目[' + config.name + ']的type为空，请设置具体type[feather2,lothar,feather]';
-                    exports.del(id);
-                    break;
-                }
-
-                repo.config = config;
-                BranchService.updateBranch(repo);
-            }
-
-            RepoModel.save(id, repo);
-        }while(0);
-
+        RepoModel.save(repo.id, repo);
+        Repo.analyseAndSave(repo);
+        BranchService.updateBranch(repo);
         delete waitCloneRepo[id];
     }, function(){
         exports.del(id);
         delete waitCloneRepo[id];
     });
-         
-    return {
-        code: 0,
-        data: repo
-    };
+
+    return this.success(repo);
 };
 
-exports.del = function(id){
+Repo.analyseAndSave = function(repo){
+    var result = ProjectService.analyse(repo.dir);
+
+    if(result.code == 0){
+        var info = {
+            feather: result.data.feather
+        };
+
+        if(!info.feather){
+            info.configs = null;
+        }else{
+            info.configs = result.data.configs;
+        }
+
+        RepoModel.update(repo.id, info);
+        
+        return this.success();
+    }else{
+        RepoModel.update(repo.id, {
+            status: RepoModel.STATUS.ERROR
+        });
+
+        return this.error(result.msg);
+    }
+};
+
+Repo.del = function(id){
     var repo;
 
     if(repo = RepoModel.get(id)){
         if(repo.status == RepoModel.STATUS.PROCESSING){
-            return {
-                code: -1,
-                msg: '仓库使用中，操作失败'
-            }   
+            return this.error('仓库使用中，操作失败');  
         }
 
         RepoModel.del(id);
@@ -151,23 +111,18 @@ exports.del = function(id){
         }, true);
     });
 
-    return {
-        code: 0
-    }
+    return this.success();
 };
 
-exports.getReposByBranch = function(branch){
+Repo.getReposByBranch = function(branch){
     return RepoModel.getReposByBranch(branch);
 };
 
-exports.getRepos = function(branch){
-    return {
-        code: 0,
-        data: branch ? RepoModel.getByBranch(branch) : RepoModel.get()
-    };
+Repo.getRepos = function(branch){
+    return this.success(branch ? RepoModel.getByBranch(branch) : RepoModel.get())
 };
 
-exports.lock = function(repos){
+Repo.lock = function(repos){
     repos.forEach(function(repo){
         RepoModel.update(repo, {
             status: RepoModel.STATUS.PROCESSING
@@ -175,7 +130,7 @@ exports.lock = function(repos){
     });
 }
 
-exports.unlock = function(repos){
+Repo.unlock = function(repos){
     if(!repos){
         repos = Object.keys(RepoModel.get());
     }
@@ -185,4 +140,4 @@ exports.unlock = function(repos){
             status: RepoModel.STATUS.NORMAL
         });
     });
-}
+};
