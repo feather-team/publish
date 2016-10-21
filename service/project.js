@@ -42,71 +42,131 @@ function scanConfigFile(dir, filename){
     return configs;
 }
 
-module.exports = _.extend({}, require('./common.js'), {
-    analyse: function(dir){
-        var config1x = scanConfigFile(dir, 'feather_conf.js'), config2x = scanConfigFile(dir, 'conf/conf.js');
-        var sameNameRepo, configs;
+var Project = module.exports = _.extend({}, require('./common.js'));
 
-        if(config1x.length && config2x.length){
-            return this.error('目录同时包含了1.x和2.0模块');
+Project.analyse = function(repo){
+    var dir = repo.dir;
+    var config1x = scanConfigFile(dir, 'feather_conf.js'), config2x = scanConfigFile(dir, 'conf/conf.js');
+    var sameNameRepo, configs;
+
+    if(config1x.length && config2x.length){
+        return this.error('目录同时包含了1.x和2.0模块');
+    }else{
+        var isFeatherX = true;
+
+        if(config1x.length){
+            configs = analyseProjectConfig(config1x, true);
+        }else if(config2x.length){
+            configs = analyseProjectConfig(config2x);
         }else{
-            var isFeatherX = true;
+            isFeatherX = false;
+        }
 
-            if(config1x.length){
-                configs = analyseProjectConfig(config1x, true);
-            }else if(config2x.length){
-                configs = analyseProjectConfig(config2x);
+        if(isFeatherX){
+            if(configs.indexOf(false) > -1){
+                return this.error('无法解析配置文件');
             }else{
-                isFeatherX = false;
-            }
+                //检查是不是都有project.type
+                var pass;
+                
+                pass = configs.every(function(config){
+                    return config.type;
+                });
 
-            if(isFeatherX){
-                if(configs.indexOf(false) > -1){
-                    return this.error('无法解析配置文件');
-                }else{
-                    //检查是不是都有project.type
-                    var pass;
-                    
-                    pass = configs.every(function(config){
-                        return config.type;
-                    });
-
-                    if(!pass){
-                        return this.error('配置文件缺少project.type属性，请设置具体的project.type属性[feather2,lothar,feather]')
-                    }
-
-                    //检查是不是都是同一个类型或一个项目的
-                    var name = configs[0].name, type = configs[0].type;
-                    pass = configs.every(function(config){
-                        return config.name == name && config.type == type;
-                    });
-
-                    if(!pass){
-                        return this.error('添加仓库中包含多模块时模块间的project.type和project.name必须相同');
-                    }   
-
-                    var sameNameRepo, sameConfig;
-                    pass = configs.every(function(config){
-                        var repo = RepoModel.getByFeatherConfig({name: config.name, modulename: config.modulename});
-
-                        if(repo){
-                            sameNameRepo = repo;
-                            sameConfig = config;
-                            return false;
-                        }
-
-                        return true;
-                    });
-
-                    if(!pass){
-                        return this.error('项目[' + sameConfig.name + ']已存在[' + sameConfig.modulename + ']模块，仓库名[' + sameNameRepo.id + ']');
-                    }
-
-                    return this.success({feather: true, configs: configs});
+                if(!pass){
+                    return this.error('配置文件缺少project.type属性，请在master分支上设置具体的project.type属性[feather2,lothar,feather]，并提交代码')
                 }
-            }
 
-            return this.success({feather: false});
+                //检查是不是都是同一个类型或一个项目的
+                var name = configs[0].name, type = configs[0].type;
+                pass = configs.every(function(config){
+                    return config.name == name && config.type == type;
+                });
+
+                if(!pass){
+                    return this.error('添加仓库中包含多模块时模块间的project.type和project.name必须相同，请在master分支上修改后提交代码！');
+                }   
+
+                var sameNameRepo, sameConfig;
+                pass = configs.every(function(config){
+                    var repo = RepoModel.getByFeatherConfig({name: config.name, modulename: config.modulename});
+
+                    if(repo){
+                        sameNameRepo = repo;
+                        sameConfig = config;
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                if(!pass){
+                    return this.error('项目[' + sameConfig.name + ']已存在[' + sameConfig.modulename + ']模块，仓库名[' + sameNameRepo.id + ']');
+                }
+
+                return this.success({feather: true, configs: configs});
+            }
+        }
+
+        return this.success({feather: false});
+    }
+};
+
+function analyseDeployConfig(info, branch){
+    var type = info.type;
+    var config = Application.get('config').deploy[type];
+    var deploy = config[branch] || config['*'];
+
+    if(!deploy) return false;
+
+    var file;
+
+    if(type == 'feather'){
+        file = info.dir + '/feather_conf.js';
+    }else{
+        file = info.dir + '/conf/conf.js';
+    }
+
+    var content = _.read(file);
+    var config = content.match(new RegExp('deploy\\b[^;$]+?' + deploy + '[\'"]?\\s*[,:]\\s*(\\[[^\\]]+\\]|\\{[^\\}]+\\})'));
+
+    if(config){
+        try{
+            return (new Function('return ' + config[1]))();
+        }catch(e){
+            return false;
+        }
+    }else if(type != 'feather'){
+        file = Path.normalize(info.dir + '/conf/deploy/' + deploy + '.js');
+
+        try{
+            if(_.exists(file)){
+                delete require.cache[file];
+                return require(file);
+            }
+        }catch(e){
+            return false;
         }
     }
-});
+}
+
+Project.analyseDeployConfig = function(repo, branch){
+    var result = [], pass;
+
+    pass = (repo.configs || []).every(function(config){
+        var deploy = analyseDeployConfig(config, branch);
+
+        if(deploy){
+            result.push(deploy);
+            return true;
+        }else{
+            return false;
+        }
+    });
+
+    if(pass){
+        return result;
+    }
+
+    return false;
+};

@@ -5,52 +5,6 @@ var SH_CWD = __dirname + '/../sh';
 
 var releasing = false, autoMode_ = false, autoReleasing = false, waits = [];
 
-function getFeatherDeployConfig(info, branch){
-    var type = info.config.type || 'feather';
-    var deploy = getDeployTypeByBranch(type, branch);
-
-    if(!deploy){
-        return false;
-    }
-
-    var file;
-
-    if(type == 'feather'){
-        file = info.dir + '/feather_conf.js';
-    }else{
-        file = info.dir + '/conf/conf.js';
-    }
-
-    var content = _.read(file);
-    var config = content.match(new RegExp('deploy\\b[^;$]+?' + deploy + '[\'"]?\\s*[,:]\\s*(\\[[^\\]]+\\]|\\{[^\\}]+\\})'));
-
-    if(config){
-        try{
-            return (new Function('return ' + config[1]))();
-        }catch(e){
-            return false;
-        }
-    }else if(type != 'feather'){
-        file = Path.normalize(info.dir + '/conf/deploy/' + deploy + '.js');
-
-        try{
-            if(_.exists(file)){
-                delete require.cache[file];
-                return require(file);
-            }
-        }catch(e){
-            return false;
-        }
-    }
-
-    return false;
-}
-
-function getDeployTypeByBranch(type, branch){
-    var config = Application.get('config').deploy[type || 'feather'];
-    return config[branch] || config['*'];
-}
-
 exports.autoMode = function(state){
     autoMode_ = state;
     waits = [];

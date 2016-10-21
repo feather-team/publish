@@ -52,7 +52,16 @@ Repo.add = function(address){
     }).then(function(info){
         repo.status = RepoModel.STATUS.NORMAL;
         RepoModel.save(repo.id, repo);
-        Repo.analyseAndSave(repo);
+        
+        var result = Repo.updateConfigs(repo);
+
+        info.msg = '仓库克隆成功！';
+
+        if(result.code == -1){
+            info.status = 'warning';
+            info.msg += result.msg;
+        }
+
         BranchService.updateBranch(repo);
         delete waitCloneRepo[id];
     }, function(){
@@ -63,8 +72,8 @@ Repo.add = function(address){
     return this.success(repo);
 };
 
-Repo.analyseAndSave = function(repo){
-    var result = ProjectService.analyse(repo.dir);
+Repo.updateConfigs = function(repo){
+    var result = ProjectService.analyse(repo);
 
     if(result.code == 0){
         var info = {

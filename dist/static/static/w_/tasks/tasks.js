@@ -6,12 +6,14 @@ return new Vue({
 
     data: {
         STATUS_CLASSNAME: {
-            'processing': 'warning',
+            'warning': 'warning',
+            'processing': 'info',
             'error': 'danger',
             'success': 'success'
         },
 
         STATUS_TXT: {
+            'warning': '警告',
             'processing': '调度中',
             'error': '失败',
             'success': '成功'
@@ -42,6 +44,8 @@ return new Vue({
                     task.showError = true;
                 }else if(task.status == 'success'){
                     task.showSuccess = true;
+                }else if(task.status == 'warning'){
+                    task.showWarning = true;
                 }
 
                 var startTime = new Date;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Feather Quick Build</title>
-        <link rel="stylesheet" href="/static/c_/bootstrap/css/bootstrap.css" type="text/css" /><link rel="stylesheet" href="/static/style.css" type="text/css" /><link rel="stylesheet" href="/static/w_/header/header.css" type="text/css" /><link rel="stylesheet" href="/static/w_/tasks/tasks.css" type="text/css" /><script src="/static/feather.js"></script><script src="/static/m_/094e347.js"></script></head>
+        <link rel="stylesheet" href="/combo?static/c_/bootstrap/css/bootstrap.css&static/style.css&static/w_/header/header.css&static/w_/tasks/tasks.css" type="text/css" /><script src="/static/feather.js"></script><script src="/static/m_/094e347.js"></script></head>
 <body>
 
 <div class="container header">
@@ -69,6 +69,9 @@
                     <p v-show="task.showError">原因：{{task.errorMsg}}</p>
                     <p v-show="task.showSuccess">
                     返回：{{{task.msg}}}
+                    </p>
+                    <p v-show="task.showWarning">
+                    警告：{{{task.msg}}}
                     </p>
                 </li>
             </template>
