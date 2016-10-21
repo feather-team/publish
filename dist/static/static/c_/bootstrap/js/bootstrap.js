@@ -5,6 +5,8 @@ define('components/bootstrap/js/bootstrap.js', function(require, exports, module
  * Licensed under the MIT license
  */
 
+var jQuery = require('components/jquery/jquery.js');
+
 if (typeof jQuery === 'undefined') {
   throw new Error('Bootstrap\'s JavaScript requires jQuery')
 }

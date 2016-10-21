@@ -74,22 +74,30 @@ Project.analyse = function(repo){
                 });
 
                 if(!pass){
-                    return this.error('配置文件缺少project.type属性，请在master分支上设置具体的project.type属性[feather2,lothar,feather]，并提交代码')
+                    return this.error('配置文件缺少project.type属性，请设置具体的project.type属性[feather2,lothar,feather]！')
                 }
 
                 //检查是不是都是同一个类型或一个项目的
-                var name = configs[0].name, type = configs[0].type;
+                var name = configs[0].name, type = configs[0].type, modules = [];
                 pass = configs.every(function(config){
+                    modules.push(config.modulename);
                     return config.name == name && config.type == type;
                 });
 
                 if(!pass){
-                    return this.error('添加仓库中包含多模块时模块间的project.type和project.name必须相同，请在master分支上修改后提交代码！');
+                    return this.error('添加仓库中包含多模块时模块间的project.type和project.name必须相同！');
                 }   
+
+                if(_.unique(modules).length != modules.length){
+                    return this.error('仓库中的模块重名！');
+                }
 
                 var sameNameRepo, sameConfig;
                 pass = configs.every(function(config){
-                    var repo = RepoModel.getByFeatherConfig({name: config.name, modulename: config.modulename});
+                    var repo = RepoModel.getByFeatherConfig({
+                        name: config.name, 
+                        modulename: config.modulename
+                    });
 
                     if(repo){
                         sameNameRepo = repo;

@@ -1,10 +1,12 @@
 var Vue = require('vue');
 var TasksView = require('widget/tasks/tasks');
+var $ = require('jquery');
+require('bootstrap')
 
 require('vue-resource');
 
 module.exports = new Vue({
-    el : '#addRepo',
+    el : '#repo-container',
     data : {
         isLoading: false,
         repo_btn: '添加',
@@ -56,22 +58,23 @@ module.exports = new Vue({
                 });
             }
         },
+        setDelRepo: function(event){
+            $('#del-modal-submit').attr('data-repo', event.target.getAttribute('data-repo'));
+        },
         delRepo: function(event){
             var factory = event.target.getAttribute('data-repo');
 
-            if(confirm('确定删除仓库' + factory + '?')){
-                this.$http.post('/repo/del', {
-                    repo: factory
-                }).then(function(res){
-                    return res.json();
-                }).then(function(data){
-                    if(data.code == 0){
-                        this.fetchRepos();
-                    }else{
-                        alert(data.msg);
-                    }
-                });
-            }
+            this.$http.post('/repo/del', {
+                repo: factory
+            }).then(function(res){
+                return res.json();
+            }).then(function(data){
+                if(data.code == 0){
+                    this.fetchRepos();
+                }else{
+                    alert(data.msg);
+                }
+            });
         }
     }
 });

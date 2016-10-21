@@ -8,7 +8,7 @@ Repo.getByFeatherConfig = function(condition){
     for(var i in repos){
         var repo = repos[i];
 
-        if(repo.feather && has(repo.config, condition)){
+        if(repo.feather && has(repo.configs, condition)){
             return repo;
         }
     }

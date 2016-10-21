@@ -4,7 +4,6 @@
     <ul class="nav nav-pills navs">
         <li><a href="/">编译</a></li>
         <li class="active"><a href="/repo">仓库</a></li>
-        <li><a href="#">任务</a></li>
     </ul>
 </block>
 
@@ -12,7 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="static/repos/repos.css" />
 
-    <div class="container" id="addRepo">
+    <div class="container" id="repo-container">
         <form>
             <div class="form-group">
                 <div class="input-group">
@@ -22,24 +21,44 @@
                     </span>
                 </div>
             </div>
-            <p v-show="show_errmsg" class="errmsg">{{repo_errmsg}}</p>
+            <div class="alert alert-danger" v-show="show_errmsg" role="alert">{{repo_errmsg}}</div>
         </form>
-        <h3 class="page-header">仓库列表：</h3>
-        <div class="treeview">
-            <ul class="list-group">
-                <li class="list-group-item" v-for="group in groups">
-                    <span class="icon expand-icon glyphicon glyphicon-object-align-horizontal"></span>
-                    <span class="icon node-icon"></span><b>{{ $key }}</b>
-                    <ul class="list-group-inline">
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="panel panel-primary" v-for="group in groups">
+                    <div class="panel-heading"><strong>{{$key}}</strong></div>
+                    <ul class="list-group">
                         <li class="list-group-item" v-for="repo in group">
                             <span class="indent"></span>
-                            <span class="icon expand-icon glyphicon glyphicon-file"></span>
+                            <span class="icon expand-icon glyphicon glyphicon-folder-close"></span>
                             {{ repo.name }}
-                            <a href="javascript:" v-on:click="delRepo" data-repo="{{repo.id}}" class="del glyphicon glyphicon-remove"></a>
+                            <a href="javascript:" data-repo="{{repo.id}}" v-on:click="setDelRepo" class="del glyphicon glyphicon-remove" data-toggle="modal" data-target="#del-modal"></a>
+                            <a href="javascript:" v-on:click="updateRepo" data-repo="{{repo.id}}" class="update glyphicon glyphicon-refresh"></a>
                         </li>
                     </ul>
-                </li>
-            </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="del-modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                            <span class="sr-only">Close</span>
+                        </button>
+                        <h4 class="modal-title">删除仓库</h4>
+                    </div>
+                    <div class="modal-body">
+                        确定删除仓库？
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" v-on:click="delRepo" id="del-modal-submit" data-dismiss="modal">确定</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

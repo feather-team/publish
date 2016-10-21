@@ -1,10 +1,14 @@
 body {
-  font: 15px "Microsoft Yahei","Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: consolas, "Microsoft Yahei","Helvetica Neue", Helvetica, Arial, sans-serif;
   padding-bottom: 100px;
 }
 
 a {
-  color: #00B7FF;
+  color: #000;
+
+  &:hover{
+    text-decoration: none;
+  }
 }
 
 ul{
