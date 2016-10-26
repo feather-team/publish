@@ -52,18 +52,26 @@ Repo.add = function(address){
     }).then(function(info){
         repo.status = RepoModel.STATUS.NORMAL;
         RepoModel.save(repo.id, repo);
-        
-        var result = Repo.updateConfigs(repo);
+        delete waitCloneRepo[id];
+
+        var result = Repo.updateConfigs(repo, true);
 
         info.msg = '仓库克隆成功！';
 
         if(result.code == -1){
-            info.status = 'warning';
-            info.msg += result.msg;
+            info.status = 'error';
+            info.msg = result.msg;
+            Repo.del(repo.id);
+            return;
         }
 
+        if(result.data.feather){
+            RepoModel.update(repo.id, {
+                feather: true
+            });
+        }
+        
         BranchService.updateBranch(repo);
-        delete waitCloneRepo[id];
     }, function(){
         exports.del(id);
         delete waitCloneRepo[id];

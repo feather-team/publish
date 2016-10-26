@@ -1,102 +1,164 @@
 var _ = require('../lib/util.js'), Path = require('path'), Task = require('../lib/task.js'), Q = require('q'), Log = require('../lib/log.js');
-var RepoService = require('./repo.js');
+var RepoService = require('./repo.js'), ProjectService = require('./project.js');
 var RepoModel = require('../model/repo.js');
 var SH_CWD = __dirname + '/../sh';
 
-var releasing = false, autoMode_ = false, autoReleasing = false, waits = [];
+var autoMode = false, releasing = false, tasks = [];
 
-exports.autoMode = function(state){
-    autoMode_ = state;
-    waits = [];
-};
+_.extend(exports, require('./common.js'));
 
-exports.addTask = function(repo, branch, normal){
-    if(!autoMode_) return;
+Object.defineProperty(exports, 'autoMode', {
+    get: function(){ 
+        return autoMode; 
+    },
+    set: function(val){
+        autoMode = val;
+        tasks = [];
+    }
+});
 
-    var task = {
-        repos: repo,
+exports.addTask = function(repos, branch, auto){
+    var opt = {
+        repos: _.toArray(repos),
         branch: branch,
-        isAuto: !normal
+        isAuto: auto || false
     };
 
-    Log.notice('add feather build task: ' + JSON.stringify(task));
+    if(!opt.repos.length){
+        return exports.error('需要编译的仓库不能为空');
+    }
 
-    waits.push(task);
-    autoRelease();
+    if(!auto && tasks.length){
+        var exists = tasks.every(function(task){
+            return task.branch == branch && opt.repos.every(function(repo){
+                return ~task.repos.indexOf(repo);
+            });
+        });
+
+        if(exists){
+            return exports.error('当前仓库分支任务已经存在队列中，请在编译完成后再次进行操作');
+        }
+    }
+
+    auto ? tasks.push(opt) : tasks.unshift(opt);
+    Log.notice('add feather build task: ' + JSON.stringify(opt));
+    process.nextTick(release);
+    return exports.success('添加任务成功，任务会被安排在最近的任务点上执行');
 };
 
-function autoRelease(){
-    if(autoReleasing) return;
+function analyseReleaseInfo(task){
+    var deps = [], releases = [], dists = [], commons = {};
 
-    var info;
+    for(var id of task.repos){
+        var repo = RepoModel.get(id);
+        var data = ProjectService.analyse(repo, task.branch == 'master');
 
-    if(info = waits.shift()){
-        autoReleasing = true;
+        if(data.code == -1){
+            return exports.error(data.msg);
+        }else if(!data.data.feather){
+            return exports.error('仓库[' + repo.id + ']中不存在feather/feather2/lothar项目');
+        }
 
-        release(info.repos, info.branch, function(){
-            if(!info.isAuto){
-                releasing = false;
+        repo.configs = data.data.configs;
+
+        data = ProjectService.analyseDeployConfig(repo, task.branch);
+
+        if(data.code == -1){
+            return exports.error(data.msg);
+        }
+
+        dists = dists.concat(data.data);
+
+        commons[repo.configs[0].name] = false;
+
+        //analyse common module
+        repo.configs.forEach(function(config){
+            var dir = config.dir.substring(RepoService.PATH.length);
+            var o = {
+                dir: dir,
+                type: config.type,
+                dest: ProjectService.getDeployName(config.type, task.branch)
+            };
+
+            if(config.modulename == 'common'){
+                releases.unshift(o);
+                commons[config.name] = true;
+            }else{
+                releases.push(o);
             }
-
-            autoReleasing = false;
-            autoRelease();
         });
     }
-}
 
-exports.release = function(repos, branch, next){
-    repos = _.toArray(repos);
+    dists = _.unique(dists);
 
-    if(!repos.length){
-        return {
-            code: -1,
-            msg: '需要编译的仓库不能为空'
-        };
-    }
-    
-    if(releasing){
-        return {
-            code: -1,
-            msg: '当前有编译任务调度中，请其他编译任务调度完成后再进行操作'
+    for(var name in commons){
+        var exists = commons[name];
+
+        if(!exists){
+            var commonRepo = RepoModel.getByFeatherConfig({
+                name: name,
+                modulename: 'common'
+            });
+
+            if(!commonRepo){
+                return exports.error('项目[' + name + ']的common模块没有找到，请添加仓库后再进行操作！');
+            }
+
+            if(commonRepo.status == RepoModel.STATUS.ERROR){
+                return exports.error('项目[' + name + ']的common模块配置错误已被冻结，请处理后再次执行！');
+            }
+
+            if(task.repos.indexOf(commonRepo.id) == -1){
+                var config = commonRepo.configs.filter(function(config){
+                    return config.modulename == 'common';
+                });
+
+                deps.push({
+                    dir: config[0].dir.substring(RepoService.PATH.length),
+                    type: config[0].type
+                });
+            }
         }
     }
 
-    releasing = true;
-    
-    if(autoMode_){
-        var check = handleReleases(_.toArray(repos), branch);
-        
-        if(check.code == -1){
-            releasing = false;
-            return check;
-        }
-
-        exports.addTask(repos, branch, true);
-        return {
-            code: -1,
-            msg: '当前系统处于自动运行阶段，该任务会被安排至最近的时间点上进行编译'
-        }
-    }
-
-    var result = release(repos, branch, function(){
-        releasing = false;
-        next && next();
+    return exports.success({
+        deps: deps,
+        releases: releases,
+        dists: dists
     });
-
-    if(result && result.code == -1){
-        return result;
-    }else{
-        return {code: 0}
-    }
 }
 
-function release(repos, branch, next){
-    var releases = handleReleases(_.toArray(repos), branch);
+function release(){
+    if(releasing || !tasks.length) return;
 
-    if(releases.code == -1){
-        next && next();
-        return releases;
-    }
+    var task = tasks.shift(), rs;
+
+    //lock factory
+    RepoService.lock(task.repos);
+    
+    //switch branch
+    taskPreprocess(task.repos, task.branch).then(function(info){
+        if(info && !info.errorMsg){
+            rs = analyseReleaseInfo(task);
+
+            if(rs.code == -1){
+                info.status = 'error';
+                info.errorMsg = rs.msg;
+                return false;
+            }
+
+            return tasking(rs.data, task.repos, task.branch);
+        }
+    }).then(function(info){
+        console.log(info);
+    }).fail(function(e){
+        Log.error(e.stack);
+    })
+
+    return;
+
+
+    var releases = handleReleases(_.toArray(repos), branch);
 
     var deps = releases.deps, needs = releases.needs, dists = releases.dists;
 
@@ -150,99 +212,32 @@ function release(repos, branch, next){
         .then(stop, stop);
 }
 
-function handleReleases(repos, branch){
-    var groups = {};
-    var depReleases = [], finalReleases = [], distRepos = [];
-
-    for(var i = 0; i < repos.length; i++){
-        var repo = RepoModel.get(repos[i]);
-        var configs = _.toArray(repo.config);
-
-        // var name = config.name, mName = config.modulename;
-
-        // if(!groups[name]){
-        //     groups[name] = [];
-        // }
-
-        // groups[name].push(mName);
-
-        // if(mName == 'common' || !mName){
-        //     finalReleases.unshift(repo.id);
-        // }else{
-        //     finalReleases.push(repo.id);
-        // }
-
-        var deploy = getFeatherDeployConfig(repo, branch);
-        var deployName = getDeployTypeByBranch(repo.config.type, branch);
-
-        if(!deploy){
-            return {
-                code: -1,
-                msg: '仓库[' + repo.id + ']的deploy.' + deployName + '配置不存在'
-            }
-        }
-
-        // var dists = _.toArray(deploy);
-
-        // for(var j = 0; j < dists.length; j++){
-        //     var dist = dists[j];
-
-        //     if(!dist.to){
-        //         return {
-        //             code: -1,
-        //             msg: '仓库[' + repo.id + ']的deploy.' + deployName + '配置不正确'
-        //         }
-        //     }
-
-        //     var to = Path.resolve(repo.dir, dist.to);
-        //     var toId = to.substring(RepoService.PATH.length).split(Path.sep).slice(0, 2).join('/');
-        //     var toRepo = RepoModel.get(toId);
-
-        //     if(!toRepo){
-        //         return {
-        //             code: -1,
-        //             msg: '仓库[' + repo.id + ']的产出仓库[' + toId + ']不存在，请确保对应仓库已成功添加进系统'
-        //         } 
-        //     }
-
-        //     distRepos.push(toRepo.id);
-        // }
-    }
-
-    return ;
-
-    for(var name in groups){
-        if(groups[name].indexOf('common') == -1){
-            var repo = RepoModel.getByFeatherConfig({
-                name: name,
-                modulename: 'common'
-            });
-
-            if(!repo){
-                return {
-                    code: -1,
-                    msg: 'feather项目[' + name + ']的[common]模块不存在，请确保对应仓库已成功添加进系统'
-                };
-            }
-
-            depReleases.push(repo.id);
-        }
-    }
-
-    return {
-        deps: depReleases,
-        needs: finalReleases,
-        dists: _.unique(distRepos)
-    };
-}
-
-function checkoutTask(branch, repos){
+function taskPreprocess(repos, branch){
     return Task.sh({
-        desc: '准备编译前环境，仓库 [' + repos.join(', ') + '] 切换分支 [' + branch + ']',
+        desc: '仓库[' + repos.join(', ') + ']的[' + branch + ']分支进行编译环境准备',
         cwd: SH_CWD,
         args: ['checkout.sh', branch, RepoService.PATH].concat(repos)
     });
 }
+
+function tasking(info, repos, branch){
+    var args = [];
+
+    _.map(info, function(vs, key){
+        var s = vs.map(function(v){
+            return v.dir + '~' + v.type + (v.dest ? '~' + v.dest : '');
+        });
+
+        args.push(key + ':' + s.join(','));
+    });
+
+    return Task.sh({
+        desc: '仓库[' + repos.join(', ') + ']的[' + branch + ']分支开始编译',
+        cwd: SH_CWD,
+        args: ['release.sh', branch, RepoService.PATH].concat(args)
+    });
+}
+
 
 function releaseTask(branch, repos, isDeps){
     var desc, sh = isDeps ? 'depRelease.sh' : 'release.sh';
@@ -282,4 +277,4 @@ function commitTask(branch, msg, repos){
     });
 }
 
-autoRelease();
+//autoRelease();

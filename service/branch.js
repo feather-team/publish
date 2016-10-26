@@ -3,13 +3,13 @@ var RepoModel = require('../model/repo.js'), BranchModel = require('../model/bra
 var ReleaseService = require('./release.js');
 
 exports.updateBranch = function(repo){
-    if(repo.feather && repo.status == RepoModel.STATUS.NORMAL){
+    if(repo.feather && repo.status != RepoModel.STATUS.PROCESSING){
         Task.git({
             args: 'fetch --all -p',
             cwd: repo.dir
         }, true)
         .then(function(info){
-            if(!info.errorMsg){
+            if(ReleaseService.autoMode && !info.errorMsg){
                 info.msg.split(/[\r\n]/g).forEach(function(line){
                     if(line.indexOf('[deleted]') > -1){
                         return;
@@ -18,7 +18,7 @@ exports.updateBranch = function(repo){
                     line = line.split(' -> ');
 
                     if(line.length > 1){
-                        ReleaseService.addTask(repo.id, line[1].split('/')[1]);
+                        ReleaseService.addTask(repo.id, line[1].split('/')[1], ReleaseService.autoMode);
                     }
                 });
             }

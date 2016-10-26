@@ -22,6 +22,10 @@ Repo.getByBranch = function(branch){
 
 function has(obj1, obj2){
     return _.toArray(obj1).some(function(config){
+        if(config.type == 'feather2'){
+            return false;
+        }
+
         for(var i in obj2){
             if(config[i] != obj2[i]){
                 return false;
