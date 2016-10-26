@@ -13,23 +13,29 @@
                 </div>
             </div>
             <div class="form-group" v-if="hasRepo">
-                <label for="">请勾选仓库：</label>
                 <div class="checkbox" v-for="repo in repos">
                     <label for="{{repo.id}}">
                         <input type="checkbox" v-model="reposNames" id="{{repo.id}}" value="{{repo.id}}" /> 
                         {{repo.id}}&emsp; 
                     </label>             
                 </div>
-                <p v-show="show_errmsg" class="errmsg">{{repo_errmsg}}</p>
                 <a v-show="show_btn" href="javascript:;" id="releaseBtn" class="btn btn-primary" v-on:click="releaseRepo" v-bind:class="{ 'loading': isLoading }" >{{release_btn}}</a>
             </div>
             <!-- stop auto submit -->
             <input type="text" style="display:none" />
         </form>
-    <!--         <div class="panel panel-info" v-if="hasResult">
-            <div class="panel-heading">编译结果</div>
-            <div class="panel-body">{{releaseResult}}</div>
-        </div> -->
+        
+        <div class="modal fade" id="add-task-modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body" style="text-align: center; padding: 20px 0px; font-size: 18px;">
+                        <i class="glyphicon glyphicon-remove" style="color: red;" v-show="show_errmsg"></i>
+                        <i class="glyphicon glyphicon-ok" style="color: green;" v-show="!show_errmsg"></i>
+                        {{repo_msg}}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script>
     require.async('static/build/build.js');

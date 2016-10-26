@@ -24,3 +24,10 @@
 #tasks-wraper .list-group-item {
   margin-bottom: 10px;
 }
+.list-group-item tr td {
+  word-break: break-all;
+}
+.list-group-item tr td:first-child {
+  width: 50px;
+  vertical-align: top;
+}

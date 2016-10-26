@@ -31,10 +31,11 @@
                     <ul class="list-group">
                         <li class="list-group-item" v-for="repo in group">
                             <span class="indent"></span>
-                            <span class="icon expand-icon glyphicon glyphicon-folder-close"></span>
+                            
+                            <span class="icon expand-icon glyphicon glyphicon glyphicon-flag" v-show="repo.feather"></span>
+                            <span class="icon expand-icon glyphicon glyphicon-folder-close" v-show="!repo.feather"></span>
                             {{ repo.name }}
                             <a href="javascript:" data-repo="{{repo.id}}" v-on:click="setDelRepo" class="del glyphicon glyphicon-remove" data-toggle="modal" data-target="#del-modal"></a>
-                            <a href="javascript:" v-on:click="updateRepo" data-repo="{{repo.id}}" class="update glyphicon glyphicon-refresh"></a>
                         </li>
                     </ul>
                 </div>

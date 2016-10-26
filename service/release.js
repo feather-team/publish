@@ -134,7 +134,7 @@ function release(){
     var task = tasks.shift(), rs;
 
     //lock factory
-    RepoService.lock(task.repos);
+    //RepoService.lock(task.repos);
     
     //switch branch
     taskPreprocess(task.repos, task.branch).then(function(info){

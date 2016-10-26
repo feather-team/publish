@@ -26,17 +26,14 @@
         <ul id="tasks" class="list-group">
             <template v-for="task in tasks">
                 <li class="list-group-item list-group-item-{{task.className}}">
-                    <p>描述：{{task.desc}}</p>
-                    <p>命令：{{task.cmd}} {{task.args.join(' ')}}</p>
-                    <p>执行时间：{{task.startTime}} ~ {{task.closeTime}}</p>
-                    <p>状态：任务{{task.text}}</p>
-                    <p v-show="task.showError">原因：{{task.errorMsg}}</p>
-                    <p v-show="task.showSuccess">
-                    返回：{{{task.msg}}}
-                    </p>
-                    <p v-show="task.showWarning">
-                    警告：{{{task.msg}}}
-                    </p>
+                    <table>
+                        <tr><td>描述：</td><td>{{task.desc}}</td></tr>
+                        <tr><td>命令：</td><td>{{task.cmd}} {{task.args.join(' ')}}</td></tr>
+                        <tr><td>时间：</td><td>{{task.startTime}} ~ {{task.closeTime}}</td></tr>
+                        <tr><td>状态：</td><td>任务{{task.text}}</td></tr>
+                        <tr v-show="task.showError"><td>原因：</td><td>{{{task.msg}}}</td></tr>
+                        <tr v-show="task.showSuccess"><td>返回：</td><td>{{{task.msg}}}</td></tr>
+                    </table>
                 </li>
             </template>
         </ul>

@@ -1,5 +1,7 @@
 var Vue = require('vue');
 require('vue-resource');
+var $ = require('jquery');
+require('bootstrap')
 
 new Vue({
     el: '#build',
@@ -11,7 +13,9 @@ new Vue({
         repos : [],
         reposNames: [],
         hasResult: false,
-        releaseResult: ''
+        releaseResult: '',
+        repo_msg: '',
+        show_errmsg: false
     },
     methods: {
         fetchRepo: function(){
@@ -58,10 +62,19 @@ new Vue({
             }).then(function(data){
                 this.$set('isLoading',false);
                 this.$set('release_btn','编译');
+
                 if( data.code != 0 ){
                     this.$set('show_errmsg', true);
-                    this.$set('repo_errmsg', data.msg);
+                    this.$set('repo_msg', data.msg);
+                }else{
+                    this.$set('show_errmsg', false);
+                    this.$set('repo_msg', data.data);
                 }
+
+                $('#add-task-modal').modal('show');
+                setTimeout(function(){
+                    $('#add-task-modal').modal('hide');
+                }, 3000);
             });
         }
     }
