@@ -55,9 +55,9 @@ function scanConfigFile(dir, filename){
     return configs;
 }
 
-var Project = module.exports = _.extend({}, require('./common.js'));
+var Project = _.extend(exports, require('./common.js'));
 
-Project.analyse = function(repo){
+Project.analyse = function(repo, needSave){
     var dir = repo.dir;
     var config1x = scanConfigFile(dir, 'feather_conf.js'), config2x = scanConfigFile(dir, 'conf/conf.js');
     var sameNameRepo, configs;
@@ -124,6 +124,11 @@ Project.analyse = function(repo){
                 if(!pass){
                     return this.error('项目[' + sameConfig.name + ']已存在[' + sameConfig.modulename + ']模块，仓库名[' + sameNameRepo.id + ']');
                 }
+
+                RepoModel.update(repo.id, {
+                    status: RepoModel.STATUS.NORMAL,
+                    configs: configs
+                });
 
                 return this.success({feather: true, configs: configs});
             }
