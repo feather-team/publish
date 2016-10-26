@@ -11,13 +11,10 @@ args=($@)
 for arg in ${args[@]}
 do            
     cd ${root}${arg}
-    echo "${root}${arg}"
-    echo 123
-    echo "当前操作[${arg}]仓库"
+    echo -e "进入[${arg}]目录\n"
     git reset --hard
     git clean -df
     execCommand $arg "git fetch origin ${branch} -p"
-    echo 123
     branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
 
     if [[ $branchCount -ne 0 ]]
@@ -27,6 +24,7 @@ do
         execCommand $arg "git submodule init"
         execCommand $arg "git submodule update"
     else
+        echo "分支${branch}不存在，尝试从master直接切换"
         execCommand $arg "git checkout master"
         execCommand $arg "git pull origin master"
 

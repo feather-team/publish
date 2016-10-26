@@ -31,7 +31,7 @@ exports.addTask = function(repos, branch, auto){
     if(!auto && tasks.length){
         var exists = tasks.every(function(task){
             return task.branch == branch && opt.repos.every(function(repo){
-                return ~task.repos.indexOf(repo);
+                return task.repos.indexOf(repo) > -1;
             });
         });
 
@@ -130,6 +130,8 @@ function analyseReleaseInfo(task){
 
 function release(){
     if(releasing || !tasks.length) return;
+
+    releasing = true;
 
     var task = tasks.shift(), rs;
 
@@ -230,7 +232,7 @@ function tasking(info, repos, branch){
     _.map(info, function(vs, key){
         if(key != 'dists'){
             vs = vs.map(function(v){
-                return v.dir + '~' + v.type;
+                return v.dir + '~' + v.type + (v.dest ? '~' + v.dest : '')
             });
         }
 
