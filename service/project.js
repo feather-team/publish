@@ -1,5 +1,6 @@
 var _ = require('../lib/util.js'), Path = require('path');
 var RepoModel = require('../model/repo.js');
+var GIT_PATH = exports.PATH = Path.normalize(__dirname + '/../data/git/');
 
 function analyseProjectConfig(files, _1x){
     return files.map(function(file){
@@ -13,8 +14,20 @@ function analyseProjectConfig(files, _1x){
         var type = content.match(/project\b[^\}]+?type['"]?\s*[,:]\s*['"]([^'"]+)/);
         var module = content.match(/project\b[^\}]+?modulename['"]?\s*[,:]\s*['"]([^'"]+)/);
         
+        if(!type){
+            if(!_1x && /\blothar\./.test(content)){
+                type = 'lothar';
+            }else if(_1x){
+                type = 'feather';
+            }else{
+                type = false;
+            }
+        }else{
+            type = type[1];
+        }
+
         return config = {
-            type: type ? type[1] : false,
+            type: type,
             name: name ? name[1] : '_default',
             modulename: module ? module[1] : 'common',
             dir: _1x ? Path.dirname(file) : Path.dirname(Path.dirname(file))
@@ -99,7 +112,7 @@ Project.analyse = function(repo){
                         modulename: config.modulename
                     });
 
-                    if(repo){
+                    if(repo.configs[0].dir != config.dir){
                         sameNameRepo = repo;
                         sameConfig = config;
                         return false;
@@ -122,9 +135,8 @@ Project.analyse = function(repo){
 
 function analyseDeployConfig(info, branch){
     var type = info.type;
-    var config = Application.get('config').deploy[type];
-    var deploy = config[branch] || config['*'];
-
+    var deploy = Project.getDeployName(type, branch);
+    
     if(!deploy) return false;
 
     var file;
@@ -158,6 +170,11 @@ function analyseDeployConfig(info, branch){
     }
 }
 
+Project.getDeployName = function(type, branch){
+    var config = Application.get('config').deploy[type];
+    return config[branch] || config['*'];
+};
+
 Project.analyseDeployConfig = function(repo, branch){
     var result = [], pass;
 
@@ -165,7 +182,21 @@ Project.analyseDeployConfig = function(repo, branch){
         var deploy = analyseDeployConfig(config, branch);
 
         if(deploy){
-            result.push(deploy);
+            for(var dist of deploy){
+                if(!dist.to){
+                    return false;
+                }
+
+                var to = Path.resolve(repo.dir, dist.to);
+                var toId = to.substring(GIT_PATH.length).split(Path.sep).slice(0, 2).join('/');
+
+                if(!RepoModel.get(toId)){
+                    return false;
+                }
+
+                result.push(toId);
+            }
+
             return true;
         }else{
             return false;
@@ -173,8 +204,8 @@ Project.analyseDeployConfig = function(repo, branch){
     });
 
     if(pass){
-        return result;
+        return exports.success(result);
     }
 
-    return false;
+    return exports.error('配置deploy中存在问题，可能的错误：\n1. 平台编译时，使用的--dest配置值为[' + JSON.stringify(Application.get('config').deploy)) + ']，请确保deploy的对应值存在 \n2. to属性所对应的仓库不存在，请添加该仓库后再进行处理 \n3. 文件存在语法错误.'
 };
