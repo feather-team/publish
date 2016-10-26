@@ -5,14 +5,8 @@ module.exports = {
             '*': 'build'
         },
 
-        feather2: {
-            'master': 'online',
-            '*': 'offline'
-        },
-
         lothar: {
-            'master': 'online',
-            '*': 'offline'
+            '*': 'local'
         }
     }
 };

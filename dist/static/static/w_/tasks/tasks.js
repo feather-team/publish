@@ -6,14 +6,12 @@ return new Vue({
 
     data: {
         STATUS_CLASSNAME: {
-            'warning': 'warning',
             'processing': 'info',
             'error': 'danger',
             'success': 'success'
         },
 
         STATUS_TXT: {
-            'warning': '警告',
             'processing': '调度中',
             'error': '失败',
             'success': '成功'
@@ -39,13 +37,14 @@ return new Vue({
                 }
 
                 task.msg = (task.msg || '').replace(/[\r\n]/g, '<br />');
+                task.errorMsg = (task.errorMsg || '').replace(/[\r\n]/g, '<br />');
 
                 if(task.status == 'error'){
                     task.showError = true;
+                    task.showSuccess = false;
                 }else if(task.status == 'success'){
                     task.showSuccess = true;
-                }else if(task.status == 'warning'){
-                    task.showWarning = true;
+                    task.showError = false;
                 }
 
                 var startTime = new Date;

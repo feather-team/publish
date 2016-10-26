@@ -144,6 +144,8 @@ function release(){
             if(rs.code == -1){
                 info.status = 'error';
                 info.errorMsg = rs.msg;
+
+                console.log(info);
                 return false;
             }
 
@@ -224,11 +226,13 @@ function tasking(info, repos, branch){
     var args = [];
 
     _.map(info, function(vs, key){
-        var s = vs.map(function(v){
-            return v.dir + '~' + v.type + (v.dest ? '~' + v.dest : '');
-        });
+        if(key == 'releases'){
+            vs = vs.map(function(v){
+                return v.dir + '~' + v.type;
+            });
+        }
 
-        args.push(key + ':' + s.join(','));
+        args.push(key + ':' + vs.join(','));
     });
 
     return Task.sh({

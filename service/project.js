@@ -185,8 +185,10 @@ Project.analyseDeployConfig = function(repo, branch){
 
     pass = (repo.configs || []).every(function(config){
         var deploy = analyseDeployConfig(config, branch);
-
+        
         if(deploy){
+            deploy = _.toArray(deploy);
+
             for(var dist of deploy){
                 if(!dist.to){
                     return false;
@@ -212,5 +214,5 @@ Project.analyseDeployConfig = function(repo, branch){
         return exports.success(result);
     }
 
-    return exports.error('配置deploy中存在问题，可能的错误：\n1. 平台编译时，使用的--dest配置值为[' + JSON.stringify(Application.get('config').deploy)) + ']，请确保deploy的对应值存在 \n2. to属性所对应的仓库不存在，请添加该仓库后再进行处理 \n3. 文件存在语法错误.'
+    return exports.error('配置deploy中存在问题，可能的错误：\n1. 平台编译时，使用的--dest配置值为[' + JSON.stringify(Application.get('config').deploy) + ']，请确保deploy的对应值存在 \n2. to属性所对应的仓库不存在，请添加该仓库后再进行处理 \n3. 文件存在语法错误.');
 };

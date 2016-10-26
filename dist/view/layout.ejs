@@ -31,7 +31,7 @@
                         <tr><td>命令：</td><td>{{task.cmd}} {{task.args.join(' ')}}</td></tr>
                         <tr><td>时间：</td><td>{{task.startTime}} ~ {{task.closeTime}}</td></tr>
                         <tr><td>状态：</td><td>任务{{task.text}}</td></tr>
-                        <tr v-show="task.showError"><td>原因：</td><td>{{{task.msg}}}</td></tr>
+                        <tr v-show="task.showError"><td>原因：</td><td>{{{task.errorMsg}}}</td></tr>
                         <tr v-show="task.showSuccess"><td>返回：</td><td>{{{task.msg}}}</td></tr>
                     </table>
                 </li>

@@ -14,7 +14,7 @@ do
     echo "当前操作[${arg}]仓库"
     git reset --hard
     git clean -df
-    execCommand $arg "git fetch --all -p"
+    execCommand $arg "git fetch origin ${branch} -p"
 
     branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
 
