@@ -18,35 +18,34 @@ dists=${dists//,/ }
 #args=($@)
 #
 
-for dep in ${deps[@]}
+for dist in ${dists[@]}
 do            
-    cd $root${dep}
+    cd $root${dist}
+    echo $root${dist}
     echo "当前操作[${dep}]仓库"
     git reset --hard
     git clean -df
-    execCommand $dep "git fetch origin ${branch} -p"
+    execCommand $dist "git fetch origin ${branch} -p"
     branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
 
     if [[ $branchCount -ne 0 ]]
     then
-        execCommand $dep "git checkout ${branch}"
-        execCommand $dep "git pull origin ${branch}"
+        execCommand $dist "git checkout ${branch}"
+        execCommand $dist "git pull origin ${branch}"
     else
-        execCommand $dep "git checkout master"
-        execCommand $dep "git pull origin master"
+        execCommand $dist "git checkout master"
+        execCommand $dist "git pull origin master"
 
         localBranchCount=`git branch -l 2>&1 | grep ${branch}$ | wc -l`
 
         if [[ $localBranchCount -ne 0 ]]
         then
-            execCommand $dep "git branch -D ${branch}"
+            execCommand $dist "git branch -D ${branch}"
         fi
         
-        execCommand $dep "git checkout -b ${branch}"
+        execCommand $dist "git checkout -b ${branch}"
     fi
 done
-
-exit
 
 for dep in ${deps[@]}
 do
