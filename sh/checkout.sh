@@ -10,12 +10,14 @@ args=($@)
 
 for arg in ${args[@]}
 do            
-    cd $root${arg}
+    cd ${root}${arg}
+    echo "${root}${arg}"
+    echo 123
     echo "当前操作[${arg}]仓库"
     git reset --hard
     git clean -df
     execCommand $arg "git fetch origin ${branch} -p"
-
+    echo 123
     branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
 
     if [[ $branchCount -ne 0 ]]

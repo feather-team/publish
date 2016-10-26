@@ -17,7 +17,7 @@ dists=${dists//,/ }
 #shift
 #args=($@)
 
-./checkout.sh $branch $root $dists
+`./checkout.sh $branch $root $dists`
 
 for dep in ${deps[@]}
 do

@@ -153,6 +153,8 @@ function release(){
         }
     }).then(function(info){
         console.log(info);
+    }, function(info){
+        console.log(info);
     }).fail(function(e){
         Log.error(e.stack);
     })
@@ -226,7 +228,7 @@ function tasking(info, repos, branch){
     var args = [];
 
     _.map(info, function(vs, key){
-        if(key == 'releases'){
+        if(key != 'dists'){
             vs = vs.map(function(v){
                 return v.dir + '~' + v.type;
             });
