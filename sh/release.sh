@@ -16,8 +16,37 @@ dists=`echo $1 | cut -d ':' -f 2`
 dists=${dists//,/ }
 #shift
 #args=($@)
+#
 
-`./checkout.sh $branch $root $dists`
+for dep in ${deps[@]}
+do            
+    cd $root${dep}
+    echo "当前操作[${dep}]仓库"
+    git reset --hard
+    git clean -df
+    execCommand $dep "git fetch origin ${branch} -p"
+    branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
+
+    if [[ $branchCount -ne 0 ]]
+    then
+        execCommand $dep "git checkout ${branch}"
+        execCommand $dep "git pull origin ${branch}"
+    else
+        execCommand $dep "git checkout master"
+        execCommand $dep "git pull origin master"
+
+        localBranchCount=`git branch -l 2>&1 | grep ${branch}$ | wc -l`
+
+        if [[ $localBranchCount -ne 0 ]]
+        then
+            execCommand $dep "git branch -D ${branch}"
+        fi
+        
+        execCommand $dep "git checkout -b ${branch}"
+    fi
+done
+
+exit
 
 for dep in ${deps[@]}
 do
