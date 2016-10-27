@@ -3,7 +3,7 @@ var RepoModel = require('../model/repo.js'), BranchModel = require('../model/bra
 var ReleaseService = require('./release.js');
 
 exports.updateBranch = function(repo){
-    if(repo.feather && repo.status != RepoModel.STATUS.PROCESSING){
+    if(repo.feather){
         Task.git({
             args: 'fetch --all -p',
             cwd: repo.dir
@@ -18,7 +18,7 @@ exports.updateBranch = function(repo){
                     line = line.split(' -> ');
 
                     if(line.length > 1){
-                        ReleaseService.addTask(repo.id, line[1].split('/')[1], ReleaseService.autoMode);
+                        ReleaseService.addTask(repo.id, line[1].split('/')[1].replace(/ \S+/g, ''), ReleaseService.autoMode);
                     }
                 });
             }

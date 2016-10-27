@@ -11,7 +11,7 @@ var server = http.Server(app);
 app.set('config', require(path.join(__dirname, 'config.js')));
 
 // view engine setup
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 4000);
 app.set('views', path.join(__dirname, 'dist/view'));
 app.set('view engine', 'ejs');
 
@@ -70,8 +70,6 @@ var BranchService = require('./service/branch.js'), RepoService = require('./ser
 })();
 
 var Log = require('./lib/log.js');
-
-app.set('env', 'production');
 
 //正式环境
 if(app.get('env') == 'production'){

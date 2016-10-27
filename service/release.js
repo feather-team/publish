@@ -152,14 +152,6 @@ function release(){
     taskPreprocess(task.repos, task.branch)
         .then(function(info){
             if(info && !info.errorMsg){
-                rs = analyseReleaseInfo(task);
-
-                if(rs.code == -1){
-                    info.status = 'error';
-                    info.errorMsg = rs.msg;
-                    return false;
-                }
-                
                 log = info.msg.match(/git log: ([^\r\n]+)/);
 
                 if(log){
@@ -170,6 +162,15 @@ function release(){
                     };
                 }
 
+                rs = analyseReleaseInfo(task);
+
+                if(rs.code == -1){
+                    info.status = 'error';
+                    info.errorMsg = rs.msg;
+                    mail(info);
+                    return false;
+                }
+
                 return tasking(rs.data, task.repos, task.branch, JSON.stringify(log.msg));
             }
         }, stop)
@@ -178,8 +179,8 @@ function release(){
             Log.error(e.stack);
         });
 
-    function stop(info){
-        if(log.mail && log.mail.indexOf('@') > -1){
+    function mail(info){
+        if(info && log.mail && log.mail.indexOf('@') > -1){
             var html = _.read(__dirname + '/../mail-tpl/release.html').toString();
             var o = {
                 desc: info.desc,
@@ -206,11 +207,14 @@ function release(){
                 Log.notice('发送邮件：' + JSON.stringify({
                     to: log.mail,
                     subject: 'feather自动编译平台任务反馈',
-                    status: info.response
+                    status: res.response
                 }));
             });
         }
+    }
 
+    function stop(info){
+        mail(info);
         RepoService.unlock();
         isAuto ? autoTasks.shift() : manualTasks.shift();
         releasing = false;
