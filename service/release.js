@@ -135,7 +135,7 @@ function release(){
 
     releasing = true;
 
-    var task, rs, isAuto, log;
+    var task, rs, isAuto, log = {};
 
     if(manualTasks.length){
         task = manualTasks[0];
@@ -159,7 +159,7 @@ function release(){
                     info.errorMsg = rs.msg;
                     return false;
                 }
-
+                
                 log = info.msg.match(/git log: ([^\r\n]+)/);
 
                 if(log){
