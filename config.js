@@ -5,8 +5,16 @@ module.exports = {
             '*': 'build'
         },
 
+        feather2: {
+            '*': 'build'
+        },
+
         lothar: {
-            '*': 'local'
+            '*': 'build'
         }
+    },
+
+    mail: {
+
     }
 };

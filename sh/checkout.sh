@@ -37,4 +37,7 @@ do
         
         execCommand $arg "git checkout -b ${branch}"
     fi
+
+    msg=`git log --pretty=format:'[%h %an %ae %s]' -n 1`
+    echo "git log: ${msg}"
 done

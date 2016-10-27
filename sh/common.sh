@@ -2,6 +2,7 @@
 
 function execCommand(){
     isGit=`echo $2 | grep '^git '`
+    errorRetry=$3
     result=`$2 2>&1`
     code=$?
 
@@ -15,8 +16,15 @@ function execCommand(){
         if [[ $hasError != "" ]]
         then
             echo "${result}"
-            echo "" >&2
-            exit $code
+
+            if [[ $errorRetry != "" ]]
+            then
+                echo "git操作出现错误，尝试重新执行"
+                execCommand $1 $2
+            else
+                echo "" >&2
+                exit $code
+            fi
         elif [[ $hasConflict != "" ]]
         then
             echo "${result}"

@@ -1,0 +1,63 @@
+<style>
+table{
+    font-size: 14px;
+    border: 2px solid #fff;
+    border-collapse: collapse;
+}
+
+tr{
+    border-left: 2px solid #fff;
+    border-top: 2px solid #fff;
+}
+
+td{
+    font-family: consolas, "微软雅黑";
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    vertical-align: top;
+    width: 700px;
+    padding: 10px;
+}
+
+tr{
+    background: #eee;
+}
+
+.col1{
+    width: 100px;
+}
+
+.row1{
+    background: #ecf5ff !important;
+}
+
+pre{
+    font-family: consolas;
+    font-size: 12px;
+    word-break: break-all;
+    width: 700px;
+    height: 500px;
+    overflow: auto;
+}
+
+.code{
+    background: #f2e6e6;
+    color: #000;
+}
+
+.error{
+    color: red;
+}
+
+.success{
+    color: green;
+}
+</style>
+
+<table>
+    <tr class="row1"><td class="col1">描述：</td><td>{{desc}}</td></tr>
+    <tr><td class="col1">时间：</td><td>{{startTime}} ~ {{closeTime}}</td></tr>
+    <tr class="row1"><td class="col1">状态：</td><td class="{{status}}"><strong>任务{{text}}</strong></td></tr>
+    <tr><td class="col1">返回：</td><td class="code"><pre>{{msg}}
+</pre></td></tr>
+</table>

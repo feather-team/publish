@@ -134,7 +134,7 @@ function release(){
 
     releasing = true;
 
-    var task, rs, isAuto;
+    var task, rs, isAuto, log;
 
     if(manualTasks.length){
         task = manualTasks[0];
@@ -159,7 +159,17 @@ function release(){
                     return false;
                 }
 
-                return tasking(rs.data, task.repos, task.branch);
+                log = info.msg.match(/git log: ([^\r\n]+)/);
+
+                if(log){
+                    log = log[1].slice(1, -1).split(' ');
+                    log = {
+                        msg: '描述[' + log[3] + ']，提交者[' + log[1] + ']，版本号[' + log[0] + ']',
+                        mail: log[2]
+                    };
+                }
+
+                return tasking(rs.data, task.repos, task.branch, JSON.stringify(log.msg));
             }
         }, stop)
         .then(stop, stop)
@@ -167,7 +177,39 @@ function release(){
             Log.error(e.stack);
         });
 
-    function stop(){
+    function stop(info){
+        if(log.mail && log.mail.indexOf('@') > -1){
+            var html = _.read(__dirname + '/../mail-tpl/release.html').toString();
+            var o = {
+                desc: info.desc,
+                msg: info.status == 'success' ? info.msg : info.errorMsg,
+                startTime: (new Date(info.startTime)).toString(),
+                closeTime: (new Date(info.closeTime)).toString(),
+                status: info.status,
+                text: info.status == 'success' ? '成功' : '失败'
+            };
+
+            _.map(o, function(v, k){
+                html = html.replace('{{' + k + '}}', v);
+            });
+
+            require('../lib/mail.js').send({
+                to: log.mail,
+                subject: 'feather自动编译平台任务反馈',
+                html: html
+            }, function(error, res){
+                if(error){
+                    return Log.error(error);
+                }
+
+                Log.notice('发送邮件：' + JSON.stringify({
+                    to: log.mail,
+                    subject: 'feather自动编译平台任务反馈',
+                    status: info.response
+                }));
+            });
+        }
+
         RepoService.unlock();
         isAuto ? autoTasks.shift() : manualTasks.shift();
         releasing = false;
@@ -183,7 +225,7 @@ function taskPreprocess(repos, branch){
     });
 }
 
-function tasking(info, repos, branch){
+function tasking(info, repos, branch, msg){
     var args = [];
 
     _.map(info, function(vs, key){
@@ -197,8 +239,8 @@ function tasking(info, repos, branch){
     });
 
     return Task.sh({
-        desc: '仓库[' + repos.join(', ') + ']的[' + branch + ']分支开始编译',
+        desc: '仓库[' + repos.join(', ') + ']的[' + branch + ']分支进行编译',
         cwd: SH_CWD,
-        args: ['release.sh', branch, RepoService.PATH].concat(args)
+        args: ['release.sh', branch, msg, RepoService.PATH].concat(args)
     });
 }

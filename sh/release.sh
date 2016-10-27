@@ -4,6 +4,8 @@
 
 branch=$1
 shift
+commitMsg=$1
+shift
 root=$1
 shift
 deps=`echo $1 | cut -d ':' -f 2`
@@ -14,9 +16,6 @@ releases=${releases//,/ }
 shift
 dists=`echo $1 | cut -d ':' -f 2`
 dists=${dists//,/ }
-#shift
-#args=($@)
-#
 
 echo -e "产出目录切换分支$branch\n"
 
@@ -26,7 +25,7 @@ do
     echo -e "进入[${dist}]目录\n"
     git reset --hard
     git clean -df
-    execCommand $dist "git fetch origin ${branch} -p"
+    execCommand $dist "git fetch --all -p"
     branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
 
     if [[ $branchCount -ne 0 ]]
@@ -97,6 +96,14 @@ do
     execCommand $dir "$cmd"
 done
 
+for release in ${releases[@]}
+do
+    dir=`echo $release | cut -d '~' -f 1`
+    cd $root${dir}
+    echo -e "恢复[${dir}]目录master分支\n"
+    execCommand $dir "git checkout master"
+done
+
 echo -e "\n编译完成，提交代码\n"
 
 for dist in ${dists[@]}
@@ -104,7 +111,7 @@ do
     cd $root${dist}
     echo -e "进入[${dist}]目录\n"
     execCommand $dist "git add -A"
-    git commit -m "前端编译平台自动提交记录" 2>&1
+    git commit -m "前端编译平台自动提交记录: ${commitMsg}" 2>&1
     branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
 
     if [[ $branchCount -ne 0 ]]
@@ -112,6 +119,6 @@ do
         execCommand $dist "git pull origin ${branch}"
     fi 
 
-    execCommand $dist "git push origin ${branch}"
+    execCommand $dist "git push origin ${branch}" "1"
     execCommand $dist "git checkout master"
 done
