@@ -60,8 +60,6 @@ io.on('connection', function(socket){
 
 var BranchService = require('./service/branch.js'), RepoService = require('./service/repo.js'), ReleaseService = require('./service/release.js');
 
-RepoService.unlock();
-
 (function(){
     BranchService.updateBranches();
     setTimeout(arguments.callee, 20 * 1000);
@@ -69,9 +67,11 @@ RepoService.unlock();
 
 var Log = require('./lib/log.js');
 
+app.set('env', 'production');
+
 //正式环境
 if(app.get('env') == 'production'){
-    ReleaseService.autoMode(true);
+    ReleaseService.autoMode = true;
 
     var time = 1000 * 60 * 60 * 2;
     //gc

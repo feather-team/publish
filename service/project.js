@@ -112,7 +112,15 @@ Project.analyse = function(repo, needSave){
                         modulename: config.modulename
                     });
 
-                    if(repo.configs[0].dir != config.dir){
+                    if(!repo){
+                        return true;
+                    }
+
+                    var exists = repo.configs.every(function(mod){
+                        return mod.modulename == config.modulename && mod.name == config.name && mod.dir != config.dir;
+                    });
+
+                    if(exists){
                         sameNameRepo = repo;
                         sameConfig = config;
                         return false;
@@ -125,11 +133,13 @@ Project.analyse = function(repo, needSave){
                     return this.error('项目[' + sameConfig.name + ']已存在[' + sameConfig.modulename + ']模块，仓库名[' + sameNameRepo.id + ']');
                 }
 
-                RepoModel.update(repo.id, {
-                    status: RepoModel.STATUS.NORMAL,
-                    configs: configs
-                });
-
+                if(needSave){
+                    RepoModel.update(repo.id, {
+                        status: RepoModel.STATUS.NORMAL,
+                        configs: configs
+                    });
+                }
+                
                 return this.success({feather: true, configs: configs});
             }
         }

@@ -3,7 +3,7 @@ var GIT_PATH = exports.PATH = Path.normalize(__dirname + '/../data/git/');
 
 var RepoModel = require('../model/repo.js'), BranchModel = require('../model/branch.js');
 var BranchService = require('./branch.js'), ProjectService = require('./project.js');
-var waitCloneRepo = {};
+var waitCloneRepo = {}, locked = 
 
 function analyseAddress(url){
     //获取组名和仓库名
@@ -22,7 +22,7 @@ function analyseAddress(url){
     return false;
 }
 
-var Repo = module.exports = _.extend({}, require('./common.js'));
+var Repo = _.extend(exports, require('./common.js'));
 
 Repo.add = function(address){
     var repo = analyseAddress(address);
@@ -61,7 +61,7 @@ Repo.add = function(address){
         if(result.code == -1){
             info.status = 'error';
             info.msg = result.msg;
-            Repo.del(repo.id);
+            Repo.del(repo.id, true);
             return;
         }
 
@@ -73,7 +73,7 @@ Repo.add = function(address){
         
         BranchService.updateBranch(repo);
     }, function(){
-        exports.del(id);
+        exports.del(id, true);
         delete waitCloneRepo[id];
     });
 
@@ -98,15 +98,15 @@ Repo.updateConfigs = function(repo){
         
         return this.success();
     }else{
-        RepoModel.update(repo.id, {
-            status: RepoModel.STATUS.ERROR
-        });
-
         return this.error(result.msg);
     }
 };
 
-Repo.del = function(id){
+Repo.del = function(id, unCheckLocked){
+    if(locked && !unCheckLocked){
+        return this.exports('当前所有仓库处于锁定状态，请等待解锁后再次操作');
+    }
+
     var repo;
 
     if(repo = RepoModel.get(id)){
@@ -139,22 +139,24 @@ Repo.getRepos = function(branch){
     return this.success(branch ? RepoModel.getByBranch(branch) : RepoModel.get())
 };
 
-Repo.lock = function(repos){
-    repos.forEach(function(repo){
-        RepoModel.update(repo, {
-            status: RepoModel.STATUS.PROCESSING
-        });
-    });
+Repo.lock = function(){
+    locked = true;
+    // repos.forEach(function(repo){
+    //     RepoModel.update(repo, {
+    //         status: RepoModel.STATUS.PROCESSING
+    //     });
+    // });
 }
 
-Repo.unlock = function(repos){
-    if(!repos){
-        repos = Object.keys(RepoModel.get());
-    }
+Repo.unlock = function(){
+    locked = false;
+    // if(!repos){
+    //     repos = Object.keys(RepoModel.get());
+    // }
 
-    repos.forEach(function(repo){
-        RepoModel.update(repo, {
-            status: RepoModel.STATUS.NORMAL
-        });
-    });
+    // repos.forEach(function(repo){
+    //     RepoModel.update(repo, {
+    //         status: RepoModel.STATUS.NORMAL
+    //     });
+    // });
 };

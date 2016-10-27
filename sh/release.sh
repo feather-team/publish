@@ -20,8 +20,6 @@ dists=${dists//,/ }
 
 echo -e "产出目录切换分支$branch\n"
 
-exit
-
 for dist in ${dists[@]}
 do            
     cd $root${dist}

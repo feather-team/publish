@@ -3,7 +3,7 @@ var RepoService = require('./repo.js'), ProjectService = require('./project.js')
 var RepoModel = require('../model/repo.js');
 var SH_CWD = __dirname + '/../sh';
 
-var autoMode = false, releasing = false, tasks = [];
+var autoMode = false, releasing = false, autoTasks = [], manualTasks = [];
 
 _.extend(exports, require('./common.js'));
 
@@ -28,9 +28,10 @@ exports.addTask = function(repos, branch, auto){
         return exports.error('需要编译的仓库不能为空');
     }
 
-    if(!auto && tasks.length){
-        var exists = tasks.every(function(task){
-            return task.branch == branch && opt.repos.every(function(repo){
+    if(!auto && (autoTasks.length || manualTasks.length)){
+        var temp = autoTasks.concat(manualTasks);
+        var exists = temp.some(function(task){
+            return task.branch == branch && opt.repos.some(function(repo){
                 return task.repos.indexOf(repo) > -1;
             });
         });
@@ -40,7 +41,7 @@ exports.addTask = function(repos, branch, auto){
         }
     }
 
-    auto ? tasks.push(opt) : tasks.unshift(opt);
+    auto ? autoTasks.push(opt) : manualTasks.push(opt);
     Log.notice('add feather build task: ' + JSON.stringify(opt));
     process.nextTick(release);
     return exports.success('添加任务成功，任务会被安排在最近的任务点上执行');
@@ -129,93 +130,49 @@ function analyseReleaseInfo(task){
 }
 
 function release(){
-    if(releasing || !tasks.length) return;
+    if(releasing || !autoTasks.length && !manualTasks.length) return;
 
     releasing = true;
 
-    var task = tasks[0], rs;
+    var task, rs, isAuto;
+
+    if(manualTasks.length){
+        task = manualTasks[0];
+        isAuto = false;
+    }else{
+        task = autoTasks[0];
+        isAuto = true;
+    }
 
     //lock factory
-    //RepoService.lock(task.repos);
+    RepoService.lock();
     
     //switch branch
-    taskPreprocess(task.repos, task.branch).then(function(info){
-        if(info && !info.errorMsg){
-            rs = analyseReleaseInfo(task);
+    taskPreprocess(task.repos, task.branch)
+        .then(function(info){
+            if(info && !info.errorMsg){
+                rs = analyseReleaseInfo(task);
 
-            if(rs.code == -1){
-                info.status = 'error';
-                info.errorMsg = rs.msg;
+                if(rs.code == -1){
+                    info.status = 'error';
+                    info.errorMsg = rs.msg;
+                    return false;
+                }
 
-                console.log(info);
-                return false;
+                return tasking(rs.data, task.repos, task.branch);
             }
+        }, stop)
+        .then(stop, stop)
+        .fail(function(e){
+            Log.error(e.stack);
+        });
 
-            return tasking(rs.data, task.repos, task.branch);
-        }
-    }).then(function(info){
-        console.log(info);
-    }, function(info){
-        console.log(info);
-    }).fail(function(e){
-        Log.error(e.stack);
-    })
-
-    return;
-
-
-    var releases = handleReleases(_.toArray(repos), branch);
-
-    var deps = releases.deps, needs = releases.needs, dists = releases.dists;
-
-    function stop(info){
-        if(!info) return;
-
-        var json = JSON.stringify(info);
-
-        if(info.errorMsg){
-            Log.error(json);
-        }else{
-            Log.notice(json);
-        }
-
-        RepoService.unlock(deps);
-        RepoService.unlock(needs);
-        RepoService.unlock(dists);
-        next && next();
+    function stop(){
+        RepoService.unlock();
+        isAuto ? autoTasks.shift() : manualTasks.shift();
+        releasing = false;
+        release();
     }
-
-    RepoService.lock(deps);
-    RepoService.lock(needs);
-    RepoService.lock(dists);
-
-    var promise = checkoutTask(branch, dists);
-
-    if(deps.length){
-        promise = promise.then(function(info){
-            if(info && !info.errorMsg){
-                return releaseTask('master', deps, true);
-            }
-        }, stop);
-    }
-
-    promise
-        .then(function(info){
-            if(info && !info.errorMsg){
-                return releaseTask(branch, needs);
-            }
-        }, stop)
-        .then(function(info){
-            if(info && !info.errorMsg){
-                return getCommitLogsTask(needs);
-            }
-        }, stop)
-        .then(function(info){
-            if(info && !info.errorMsg){
-                return commitTask(branch, JSON.stringify(info.msg), dists);
-            }
-        }, stop)
-        .then(stop, stop);
 }
 
 function taskPreprocess(repos, branch){
@@ -245,44 +202,3 @@ function tasking(info, repos, branch){
         args: ['release.sh', branch, RepoService.PATH].concat(args)
     });
 }
-
-
-function releaseTask(branch, repos, isDeps){
-    var desc, sh = isDeps ? 'depRelease.sh' : 'release.sh';
-
-    if(isDeps){
-        desc = '编译依赖仓库[' + repos.join(', ') + '] 的 [' + branch + '] 分支，不产出'
-    }else{
-        desc = '编译仓库[' + repos.join(', ') + '] 的 [' + branch + '] 分支'
-    }
-
-    repos = repos.map(function(repo){
-        var info = RepoModel.get(repo);
-        var type = info.config.type || 'feather';
-        var deploy = getDeployTypeByBranch(type, branch);
-        return repo + ':' + type + ':' + deploy;
-    });
-
-    return Task.sh({
-        desc: desc,
-        cwd: SH_CWD,
-        args: [sh, branch, RepoService.PATH].concat(repos)
-    });
-}
-
-function getCommitLogsTask(repos){
-    return Task.sh({
-        cwd: SH_CWD,
-        args: ['log.sh', RepoService.PATH].concat(repos)
-    }, true);
-}
-
-function commitTask(branch, msg, repos){
-    return Task.sh({
-        desc: '编译完成，提交仓库 [' + repos.join(', ') + '] 的 [' + branch + '] 分支',
-        cwd: SH_CWD,
-        args: ['commit.sh', branch, RepoService.PATH, msg].concat(repos)
-    });
-}
-
-//autoRelease();
