@@ -24,7 +24,7 @@
             <div class="alert alert-danger" v-show="show_errmsg" role="alert">{{repo_errmsg}}</div>
         </form>
 
-        <div class="row">
+        <div class="row" id="repos">
             <div class="col-md-4">
                 <div class="panel panel-primary" v-for="group in groups">
                     <div class="panel-heading"><strong>{{$key}}</strong></div>

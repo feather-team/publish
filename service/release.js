@@ -133,7 +133,7 @@ function release(){
 
     releasing = true;
 
-    var task = tasks.shift(), rs;
+    var task = tasks[0], rs;
 
     //lock factory
     //RepoService.lock(task.repos);

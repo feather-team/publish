@@ -1,4 +1,6 @@
 var Vue = require('vue'), IO = require('socket.io-client/socket.io.js');
+var $ = require('jquery');
+require('bootstrap');
 
 return new Vue({
     el : '#tasks-wraper',
@@ -36,15 +38,6 @@ return new Vue({
                 }
 
                 task.msg = (task.msg || '').replace(/[\r\n]/g, '<br />');
-                task.errorMsg = (task.errorMsg || '').replace(/[\r\n]/g, '<br />');
-
-                if(task.status == 'error'){
-                    task.showError = true;
-                    task.showSuccess = false;
-                }else if(task.status == 'success'){
-                    task.showSuccess = true;
-                    task.showError = false;
-                }
 
                 var startTime = new Date;
                 startTime.setTime(task.startTime);
@@ -86,6 +79,16 @@ return new Vue({
         },
         hide: function(){
             this.$set('hidden', true);
+        },
+
+        showDetail: function(event){
+            var id = event.target.getAttribute('data-id');
+            this.$http.get('/build/detail?id=' + id).then(function(res){
+                return res.json();
+            }).then(function(data){
+                this.$set('exec_detail', data.data);
+                $('#task-info-modal').modal('show');
+            });
         }
     }
 });

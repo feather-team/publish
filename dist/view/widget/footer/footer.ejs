@@ -6,15 +6,33 @@
                 <li class="list-group-item list-group-item-{{task.className}}">
                     <table>
                         <tr><td>描述：</td><td>{{task.desc}}</td></tr>
-                        <tr><td>命令：</td><td>{{task.cmd}} {{task.args.join(' ')}}</td></tr>
                         <tr><td>时间：</td><td>{{task.startTime}} ~ {{task.closeTime}}</td></tr>
-                        <tr><td>状态：</td><td>任务{{task.text}}</td></tr>
-                        <tr v-show="task.showError"><td>原因：</td><td>{{{task.errorMsg}}}</td></tr>
-                        <tr v-show="task.showSuccess"><td>返回：</td><td>{{{task.msg}}}</td></tr>
+                        <tr><td>状态：</td><td>任务{{task.text}} <a v-show="task.status == 'success'" v-on:click="showDetail" href="javascript:" data-id="{{task.id}}">点击查看详细信息</a></td></tr>
+                        <tr v-show="task.status == 'error'"><td>原因：</td><td>{{{task.errorMsg}}}</td></tr>
                     </table>
                 </li>
             </template>
         </ul>
+    </div>
+
+    <div class="modal fade" id="task-info-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title">任务执行详细信息</h4>
+                </div>
+                <div class="modal-body">
+                    <pre>{{exec_detail}}</pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="del-modal-submit" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div><script>require.async('widget/tasks/tasks.js');</script>
 

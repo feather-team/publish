@@ -9,6 +9,7 @@ var controllers = {};
 
 router.get('/', controllers.build);
 router.post('/build/release', controllers.build.release);
+router.get('/build/detail', controllers.build.detail);
 router.get('/repo', controllers.repo);
 router.get('/repo/list', controllers.repo.getList);
 router.post('/repo/add', controllers.repo.add);

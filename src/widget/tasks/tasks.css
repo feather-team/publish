@@ -4,7 +4,7 @@
     left: 0px;
     bottom: 0px;
     margin-bottom: 0px;
-    z-index: 1000;
+    z-index: 1041;
 }
 
 #tasks-wraper .panel-heading{
@@ -38,4 +38,14 @@
         width: 50px;
         vertical-align: top;
     }
+}
+
+#tasks-wraper .modal-body{
+    height: 600px;
+    overflow: auto;
+}
+
+#tasks-wraper pre{
+    width: 550px;
+    word-break: break-all;
 }
