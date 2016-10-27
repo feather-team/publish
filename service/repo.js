@@ -3,7 +3,7 @@ var GIT_PATH = exports.PATH = Path.normalize(__dirname + '/../data/git/');
 
 var RepoModel = require('../model/repo.js'), BranchModel = require('../model/branch.js');
 var BranchService = require('./branch.js'), ProjectService = require('./project.js');
-var waitCloneRepo = {}, locked = 
+var waitCloneRepo = {}, locked = false;
 
 function analyseAddress(url){
     //获取组名和仓库名
