@@ -199,7 +199,9 @@ Project.analyseDeployConfig = function(repo, branch){
         if(deploy){
             deploy = _.toArray(deploy);
 
-            for(var dist of deploy){
+            for(var i = 0; i < deploy.length; i++){
+                var dist = deploy[i];
+                
                 if(!dist.to){
                     return false;
                 }

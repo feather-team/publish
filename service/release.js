@@ -50,7 +50,8 @@ exports.addTask = function(repos, branch, auto){
 function analyseReleaseInfo(task){
     var deps = [], releases = [], dists = [], commons = {};
 
-    for(var id of task.repos){
+    for(var i = 0; i < task.repos.length; i++){
+        var id = task.repos[i];
         var repo = RepoModel.get(id);
         var data = ProjectService.analyse(repo, task.branch == 'master');
 
