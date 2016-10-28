@@ -25,8 +25,8 @@
         </form>
 
         <div class="row" id="repos">
-            <div class="col-md-4">
-                <div class="panel panel-primary" v-for="group in groups">
+            <div class="col-md-4" v-for="group in groups">
+                <div class="panel panel-primary">
                     <div class="panel-heading"><strong>{{$key}}</strong></div>
                     <ul class="list-group">
                         <li class="list-group-item" v-for="repo in group">
