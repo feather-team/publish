@@ -208,7 +208,7 @@ Project.analyseDeployConfig = function(repo, branch){
 
                 var to = Path.resolve(config.dir, dist.to);
                 var toId = to.substring(GIT_PATH.length).split(Path.sep).slice(0, 2).join('/');
-                console.log(toId);
+
                 if(!RepoModel.get(toId)){
                     return false;
                 }
