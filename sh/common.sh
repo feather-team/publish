@@ -15,14 +15,13 @@ function execCommand(){
 
         if [[ $hasError != "" ]]
         then
-            echo "${result}"
-
             if [[ $errorRetry != "" ]]
             then
+                echo "${result}"
                 echo "git操作出现错误，尝试重新执行"
-                execCommand $1 $2
+                execCommand $1 "$2"
             else
-                echo "" >&2
+                echo "${result}" >&2
                 exit $code
             fi
         elif [[ $hasConflict != "" ]]
@@ -39,8 +38,7 @@ function execCommand(){
     else
         if [[ $code -ne 0 ]]
         then
-            echo "${result}" 
-            echo "" >&2
+            echo "${result}" >&2
             exit $code
         else
             echo "${result}"
