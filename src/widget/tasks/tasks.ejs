@@ -8,7 +8,7 @@
                         <tr><td>描述：</td><td>{{task.desc}}</td></tr>
                         <tr><td>时间：</td><td>{{task.startTime}}&nbsp;~&nbsp;{{task.closeTime}}</td></tr>
                         <tr><td>状态：</td><td>任务{{task.text}}&nbsp;<a v-show="(task.status == 'success' || task.status == 'error') && !task.errorMsg" v-on:click="showDetail" href="javascript:" data-id="{{task.id}}" data-status="{{task.status}}">点击查看返回信息</a></td></tr>
-                        <tr v-show="task.errorMsg"><td>原因：</td><td>{{task.errorMsg}}</td></tr>
+                        <tr v-show="task.errorMsg"><td>原因：</td><td>{{{task.errorMsg}}}</td></tr>
                     </table>
                 </li>
             </template>
