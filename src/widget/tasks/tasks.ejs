@@ -6,8 +6,8 @@
                 <li class="list-group-item list-group-item-{{task.className}}">
                     <table>
                         <tr><td>描述：</td><td>{{task.desc}}</td></tr>
-                        <tr><td>时间：</td><td>{{task.startTime}} ~ {{task.closeTime}}</td></tr>
-                        <tr><td>状态：</td><td>任务{{task.text}} <a v-show="task.status == 'success'" v-on:click="showDetail" href="javascript:" data-id="{{task.id}}">点击查看详细信息</a></td></tr>
+                        <tr><td>时间：</td><td>{{task.startTime}}&nbsp;~&nbsp;{{task.closeTime}}</td></tr>
+                        <tr><td>状态：</td><td>任务{{task.text}}&nbsp;<a v-show="task.status == 'success'" v-on:click="showDetail" href="javascript:" data-id="{{task.id}}">点击查看详细信息</a></td></tr>
                         <tr v-show="task.status == 'error'"><td>原因：</td><td>{{{task.errorMsg}}}</td></tr>
                     </table>
                 </li>
