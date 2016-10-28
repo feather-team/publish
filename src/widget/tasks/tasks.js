@@ -38,6 +38,7 @@ return new Vue({
                 }
 
                 task.msg = (task.msg || '').replace(/[\r\n]/g, '<br />');
+                task.errorMsg = (task.errorMsg || '').replace(/[\r\n]/g, '<br />');
 
                 var startTime = new Date;
                 startTime.setTime(task.startTime);
