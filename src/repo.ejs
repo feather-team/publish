@@ -34,7 +34,7 @@
                             
                             <span class="icon expand-icon glyphicon glyphicon glyphicon-flag" v-show="repo.feather"></span>
                             <span class="icon expand-icon glyphicon glyphicon-folder-close" v-show="!repo.feather"></span>
-                            {{ repo.name }}
+                            &nbsp;{{ repo.name }}
                             <a href="javascript:" data-repo="{{repo.id}}" v-on:click="setDelRepo" class="del glyphicon glyphicon-remove" data-toggle="modal" data-target="#del-modal"></a>
                         </li>
                     </ul>
