@@ -47,3 +47,7 @@ exports.updateBranch = function(repo){
 exports.updateBranches = function(){
     _.map(RepoModel.get(), exports.updateBranch);
 };
+
+exports.clear = function(){
+    BranchModel.truncate();
+};

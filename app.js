@@ -64,6 +64,8 @@ io.on('connection', function(socket){
 
 var BranchService = require('./service/branch.js'), RepoService = require('./service/repo.js'), ReleaseService = require('./service/release.js');
 
+BranchService.clear();
+
 (function(){
     BranchService.updateBranches();
     setTimeout(arguments.callee, 20 * 1000);
