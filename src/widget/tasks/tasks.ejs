@@ -7,8 +7,7 @@
                     <table>
                         <tr><td>描述：</td><td>{{task.desc}}</td></tr>
                         <tr><td>时间：</td><td>{{task.startTime}}&nbsp;~&nbsp;{{task.closeTime}}</td></tr>
-                        <tr><td>状态：</td><td>任务{{task.text}}&nbsp;<a v-show="task.status == 'success'" v-on:click="showDetail" href="javascript:" data-id="{{task.id}}">点击查看详细信息</a></td></tr>
-                        <tr v-show="task.status == 'error'"><td>原因：</td><td>{{{task.errorMsg}}}</td></tr>
+                        <tr><td>状态：</td><td>任务{{task.text}}&nbsp;<a v-show="task.status == 'success'" v-on:click="showDetail" href="javascript:" data-id="{{task.id}}" data-status="{{task.status}}">点击查看返回信息</a></td></tr>
                     </table>
                 </li>
             </template>
@@ -23,10 +22,10 @@
                         <span aria-hidden="true">&times;</span>
                         <span class="sr-only">Close</span>
                     </button>
-                    <h4 class="modal-title">任务执行详细信息</h4>
+                    <h4 class="modal-title">任务返回信息</h4>
                 </div>
                 <div class="modal-body">
-                    <pre>{{exec_detail}}</pre>
+                    <pre class="{{status}}">{{exec_detail}}</pre>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="del-modal-submit" data-dismiss="modal">关闭</button>

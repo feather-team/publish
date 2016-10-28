@@ -48,4 +48,8 @@
 #tasks-wraper pre{
     width: 550px;
     word-break: break-all;
+
+    pre.error{
+        background: #a94442;
+    }
 }

@@ -102,9 +102,13 @@ done
 for release in ${releases[@]}
 do
     dir=`echo $release | cut -d '~' -f 1`
-    cd $root${dir}
-    echo -e "恢复[${dir}]目录master分支\n"
-    execCommand $dir "git checkout master"
+    
+    if [ -d "$root${dir}" ]
+    then
+        cd $root${dir}
+        echo -e "恢复[${dir}]目录master分支\n"
+        execCommand $dir "git checkout master"
+    fi
 done
 
 echo -e "\n编译完成，提交代码\n"

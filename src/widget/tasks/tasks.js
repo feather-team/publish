@@ -88,6 +88,7 @@ return new Vue({
                 return res.json();
             }).then(function(data){
                 this.$set('exec_detail', data.data);
+                this.$set('status', event.target.getAttribute('data-status'));
                 $('#task-info-modal').modal('show');
             });
         }
