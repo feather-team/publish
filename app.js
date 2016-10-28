@@ -8,7 +8,11 @@ var app = global.Application = express();
 var http = require('http');
 var server = http.Server(app);
 
-app.set('config', require(path.join(__dirname, 'config.js')));
+if(app.get('env') == 'production' && _.exists(__dirname + '/config/pd.js')){
+    app.set('config', require('./config/pd.js'));
+}else{
+    app.set('config', require('./config/dev.js'));
+}
 
 // view engine setup
 app.set('port', process.env.PORT || 4000);

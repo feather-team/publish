@@ -1,3 +1,5 @@
+//正式环境，请在该目录下添加pd.js
+
 module.exports = {
     deploy: {
         feather: {
@@ -15,6 +17,11 @@ module.exports = {
     },
 
     mail: {
-
+        host: '',
+        from: '',
+        auth: {
+            user: '',
+            pass: ''
+        }
     }
 };
