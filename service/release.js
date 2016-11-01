@@ -155,10 +155,11 @@ function release(){
                 log = info.msg.match(/git log: ([^\r\n]+)/);
 
                 if(log){
-                    log = log[1].slice(1, -1).split(' ');
+                    log = log[1].slice(1, -1);
+                    var s = log.split(' ');
                     log = {
-                        msg: '描述[' + log[3] + ']，提交者[' + log[1] + ']，版本号[' + log[0] + ']',
-                        mail: log[2]
+                        msg: '描述[' + log.substring(s.slice(0, 3).join(' ').length + 1) + ']，提交者[' + s[1] + ']，版本号[' + s[0] + ']',
+                        mail: s[2]
                     };
                 }
 
