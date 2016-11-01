@@ -26,13 +26,13 @@ do
     git reset --hard
     git clean -df
 
-    fetchRes=`git fetch origin ${branch} 2>&1`
-    noBranch=`echo $fetchRes|grep "Couldn't find remote ref ${branch} fatal:"`
+    # fetchRes=`git fetch origin ${branch} 2>&1`
+    # noBranch=`echo $fetchRes|grep "Couldn't find remote ref ${branch} fatal:"`
 
-    # execCommand $dist "git fetch --all -p"
-    # branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
+    execCommand $dist "git fetch --all -p"
+    branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
 
-    if [[ $noBranch == "" ]]
+    if [[ $branchCount -ne 0 ]]
     then
         execCommand $dist "git checkout ${branch}"
         execCommand $dist "git pull origin ${branch}"
