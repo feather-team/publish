@@ -90,7 +90,7 @@ if(app.get('env') == 'production'){
 
     //程序退出或者crash的一些处理
     process.on('uncaughtException', function(err){
-        Log.error(err);　　
+        Log.error(err.stack);　　
     });
 
     process.on('exit', function(){
