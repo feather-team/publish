@@ -14,9 +14,9 @@ do
     echo -e "进入[${arg}]目录\n"
     git reset --hard
     git clean -df
-    execCommand $arg "git fetch origin ${branch}"
+    execCommand $arg "git fetch origin ${branch}" "1"
     execCommand $arg "git checkout ${branch}"
-    execCommand $arg "git pull origin ${branch}"
+    execCommand $arg "git pull origin ${branch}" "1"
     execCommand $arg "git submodule init"
     execCommand $arg "git submodule update"
 

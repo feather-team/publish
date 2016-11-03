@@ -29,17 +29,17 @@ do
     # fetchRes=`git fetch origin ${branch} 2>&1`
     # noBranch=`echo $fetchRes|grep "Couldn't find remote ref ${branch} fatal:"`
 
-    execCommand $dist "git fetch --all -p"
+    execCommand $dist "git fetch --all -p" "1"
     branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
 
     if [[ $branchCount -ne 0 ]]
     then
         execCommand $dist "git checkout ${branch}"
-        execCommand $dist "git pull origin ${branch}"
+        execCommand $dist "git pull origin ${branch}" "1"
     else
         echo "远程${branch}分支不存在，尝试删除本地分支并切换新分支"
         execCommand $dist "git checkout master"
-        execCommand $dist "git pull origin master"
+        execCommand $dist "git pull origin master" "1"
 
         localBranchCount=`git branch -l 2>&1 | grep ${branch}$ | wc -l`
 
@@ -123,7 +123,7 @@ do
 
     if [[ $branchCount -ne 0 ]]
     then
-        execCommand $dist "git pull origin ${branch}"
+        execCommand $dist "git pull origin ${branch}" "1"
     fi 
 
     execCommand $dist "git push origin ${branch}" "1"
