@@ -39,3 +39,7 @@
   width: 550px;
   word-break: break-all;
 }
+#tasks-wraper pre.error {
+  color: #a94442;
+  background-color: #f2dede;
+}

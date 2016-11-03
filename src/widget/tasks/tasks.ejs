@@ -1,3 +1,6 @@
+<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css" />
+<link rel="stylesheet" href="/static/style.css" />
+
 <div class="panel panel-primary" id="tasks-wraper" v-show="show" transition="expand">
     <div class="panel-heading" v-on:click="toggle">任务调度列表</div>
     <div class="panel-body" v-bind:class="{'panel-hidden': hidden}">
@@ -16,14 +19,14 @@
     </div>
 
     <div class="modal fade" id="task-info-modal">
-        <div class="modal-dialog">
+        <div class="modal-dialog" style="width: 900px;">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">
                         <span aria-hidden="true">&times;</span>
                         <span class="sr-only">Close</span>
                     </button>
-                    <h4 class="modal-title">任务返回信息</h4>
+                    <h4 class="modal-title">任务返回</h4>
                 </div>
                 <div class="modal-body">
                     <pre class="{{status}}">{{exec_detail}}</pre>

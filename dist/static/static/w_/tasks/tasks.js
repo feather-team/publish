@@ -39,6 +39,7 @@ return new Vue({
                 }
 
                 task.msg = (task.msg || '').replace(/[\r\n]/g, '<br />');
+                task.errorMsg = (task.errorMsg || '').replace(/[\r\n]/g, '<br />');
 
                 var startTime = new Date;
                 startTime.setTime(task.startTime);
@@ -88,6 +89,7 @@ return new Vue({
                 return res.json();
             }).then(function(data){
                 this.$set('exec_detail', data.data);
+                this.$set('status', event.target.getAttribute('data-status'));
                 $('#task-info-modal').modal('show');
             });
         }
