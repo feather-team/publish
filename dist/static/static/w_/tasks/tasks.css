@@ -36,8 +36,11 @@
   overflow: auto;
 }
 #tasks-wraper pre {
-  width: 550px;
   word-break: break-all;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: #3c763d;
+  background: #dff0d8;
 }
 #tasks-wraper pre.error {
   color: #a94442;

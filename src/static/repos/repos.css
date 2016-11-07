@@ -12,11 +12,11 @@
         }
 
         &::-webkit-scrollbar {
-            width:10px;
+            width: 4px;
         }
         &::-webkit-scrollbar-thumb{
-            background:#D1EEEE;
-            border-radius:4px;
+            background: #ddd;
+            border-radius: 10px;
         }
 
     }
