@@ -2,3 +2,17 @@
   float: right;
   margin-left: 7px;
 }
+#repos .list-group {
+  height: 204px;
+  overflow-y: auto;
+}
+#repos .list-group .icon {
+  margin-right: 10px;
+}
+#repos .list-group::-webkit-scrollbar {
+  width: 4px;
+}
+#repos .list-group::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 4px;
+}
