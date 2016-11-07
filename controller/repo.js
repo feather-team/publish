@@ -13,10 +13,13 @@ Repo.getList = function(req, res){
         var group = temp[0], name = temp[1];
 
         if(!result[group]){
-            result[group] = {};
+            result[group] = {
+                repos: {},
+                class: 'col-md-4'
+            };
         }
 
-        result[group][name] = item;
+        result[group]['repos'][name] = item;
     });
 
     res.send({

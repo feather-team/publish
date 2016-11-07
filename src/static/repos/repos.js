@@ -8,6 +8,8 @@ require('vue-resource');
 module.exports = new Vue({
     el : '#repo-container',
     data : {
+        column: 3,
+        row: 5,
         isLoading: false,
         repo_btn: '添加',
         show_errmsg : false,
@@ -17,8 +19,9 @@ module.exports = new Vue({
     },
     ready : function(){
         var self = this;
-
-        self.fetchRepos();   
+         
+        
+        self.fetchRepos();
 
         TasksView.$on('update', function(){
             self.fetchRepos();
@@ -30,11 +33,53 @@ module.exports = new Vue({
                 return res.json();
             }).then(function(data){
                 if(data.code == 0){
-                    this.$set('groups', data.data);
+                    this.organizeRepos(data.data);
                 }else{
                     alert(res.message || '未知错误');
                 }
             });
+        },
+        getObjectLen: function(obj){  
+            var arr = Object.keys(obj);
+            return arr.length;
+        },
+        organizeRepos: function(groups){
+            var tempcount = 0, reposLen = 0, reposLeft = 0,
+                count = this.getObjectLen(groups);
+
+            for( var group in groups){
+                switch( count%(this.column) ){
+                    case 1:
+                        if( tempcount == count-1 ){
+                            groups[group].class = 'col-md-12';
+                        }
+                        break;
+                    case 2:
+                        if( tempcount == count-1 || tempcount == count-2){
+                            groups[group].class = 'col-md-6';
+                        }
+                        break;
+                    default:
+                        groups[group].class = 'col-md-4';
+                        break;
+                }
+
+                reposLen = this.getObjectLen((groups[group].repos));
+                if( reposLen < this.row ){
+                    for(var i=(this.row - reposLen); i > 0; i--){
+                       groups[group].repos['...'+i] = {
+                            "id": "hf-dev-1/...",
+                            "group": "hf-dev-1",
+                            "name": "...",
+                            "repo": true
+                       }; 
+                    }
+                }
+
+                tempcount++;
+            }
+            
+            this.$set('groups',groups);
         },
         addRepo : function(){
             if(this.repo_address){ //add rule
