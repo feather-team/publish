@@ -44,25 +44,19 @@ module.exports = new Vue({
             return arr.length;
         },
         organizeRepos: function(groups){
-            var tempcount = 0, reposLen = 0, reposLeft = 0,
+            var tempcount = 0, reposLen = 0,
                 count = this.getObjectLen(groups);
+            var left = count%(this.column);
 
             for( var group in groups){
-                switch( count%(this.column) ){
-                    case 1:
-                        if( tempcount == count-1 ){
-                            groups[group].class = 'col-md-12';
-                        }
+
+                groups[group].class = 'col-md-'+ parseInt(12/this.column);
+                for( var j=1; j<=left; j++){
+                    if( tempcount == count-j ){
+                        groups[group].class = 'col-md-' + parseInt(12/left);   
                         break;
-                    case 2:
-                        if( tempcount == count-1 || tempcount == count-2){
-                            groups[group].class = 'col-md-6';
-                        }
-                        break;
-                    default:
-                        groups[group].class = 'col-md-4';
-                        break;
-                }
+                    }
+                } 
 
                 reposLen = this.getObjectLen((groups[group].repos));
                 if( reposLen < this.row ){

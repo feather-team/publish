@@ -15,7 +15,7 @@ Repo.getList = function(req, res){
         if(!result[group]){
             result[group] = {
                 repos: {},
-                class: 'col-md-4'
+                class: ''
             };
         }
 
