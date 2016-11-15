@@ -39,13 +39,9 @@ module.exports = new Vue({
                 }
             });
         },
-        getObjectLen: function(obj){  
-            var arr = Object.keys(obj);
-            return arr.length;
-        },
         organizeRepos: function(groups){
             var tempcount = 0, reposLen = 0,
-                count = this.getObjectLen(groups);
+                count = Object.keys(groups).length;
             var left = count%(this.column);
 
             for( var group in groups){
@@ -58,7 +54,7 @@ module.exports = new Vue({
                     }
                 } 
 
-                reposLen = this.getObjectLen((groups[group].repos));
+                reposLen = Object.keys(groups[group].repos).length;
                 if( reposLen < this.row ){
                     for(var i=(this.row - reposLen); i > 0; i--){
                        groups[group].repos['...'+i] = {
