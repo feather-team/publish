@@ -10,8 +10,8 @@ function execCommand(){
 
     if [[ $isGit != "" ]]
     then
-        hasError=`echo $result | grep -E '(fatal:|error:)'`
-        hasConflict=`echo $result | grep -E '(CONFLICT|Automatic merge failed)'`
+        hasError=`echo $result | grep -iE '(fatal:|error:)'`
+        hasConflict=`echo $result | grep -iE '(CONFLICT|Automatic merge failed)'`
 
         if [[ $hasError != "" ]]
         then
