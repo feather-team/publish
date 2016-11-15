@@ -74,7 +74,7 @@ do
         arg='pd'
     fi
     echo "${cmd} release ${arg}"
-    ${cmd} release ${arg}
+    execCommand $dir "${cmd} release ${arg}"
 done
 
 echo -e "\n正式编译开始\n"
@@ -96,7 +96,7 @@ do
     fi
 
     echo "${cmd} release ${arg} -d ${dest}"
-    $cmd release ${arg} -d $dest
+    execCommand $dir "${cmd} release ${arg} -d ${dest}"
 done
 
 for release in ${releases[@]}
