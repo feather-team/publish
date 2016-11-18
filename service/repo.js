@@ -60,7 +60,7 @@ Repo.add = function(address){
 
         if(result.code == -1){
             info.status = 'error';
-            info.msg = result.msg;
+            info.msg = info.errorMsg = result.msg;
             Repo.del(repo.id, true);
             return;
         }
