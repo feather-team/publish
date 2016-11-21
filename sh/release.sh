@@ -67,6 +67,12 @@ do
     execCommand $arg "git submodule init"
     execCommand $arg "git submodule update"
 
+    if [ -e "package.json" ] && [[ $cmd != "feather" ]]
+    then
+        echo "安装npm插件"
+        execCommand $dir "npm install"
+    fi
+
     if [[ $cmd == "feather" ]]
     then
         arg='-opmD'
@@ -87,6 +93,12 @@ do
 
     cd $root${dir}
     echo -e "进入[${dir}]目录\n"
+
+    if [ -e "package.json" ] && [[ $cmd != "feather" ]]
+    then
+        echo "安装npm插件"
+        execCommand $dir "npm install"
+    fi
 
     if [[ $cmd == "feather" ]]
     then

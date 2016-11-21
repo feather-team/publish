@@ -36,7 +36,9 @@ function execCommand(){
             echo ""
         fi
     else
-        if [[ $code -ne 0 ]]
+        hasError=`echo $result | grep -iE 'npm ERR!'`
+
+        if [[ $code -ne 0 ]] || [[ $hasError != "" ]]
         then
             echo "${result}" >&2
             exit $code
