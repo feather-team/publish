@@ -47,7 +47,7 @@ exports.addTask = function(repos, branch, auto){
     return exports.success('添加任务成功，任务会被安排在最近的任务点上执行');
 };
 
-function analyseReleaseInfo(task){
+function analyseReleaseInfo(task, diffs){
     var deps = [], releases = [], dists = [], commons = {};
 
     for(var i = 0; i < task.repos.length; i++){
@@ -73,8 +73,20 @@ function analyseReleaseInfo(task){
 
         commons[repo.configs[0].name] = false;
 
+        var configs = repo.configs;
+
+        if(configs.length > 1){
+            configs = configs.filter(function(config){
+                return diffs.indexOf(config.modulename) > -1;
+            });
+
+            if(!configs.length){
+                configs = repo.configs;
+            }
+        }
+
         //analyse common module
-        repo.configs.forEach(function(config){
+        configs.forEach(function(config){
             var dir = config.dir.substring(RepoService.PATH.length);
             var o = {
                 dir: dir,
@@ -163,7 +175,13 @@ function release(){
                     };
                 }
 
-                rs = analyseReleaseInfo(task);
+                var diffs = [], x, reg = /diff --git a\/([^\/\r\n]+)/g;
+
+                while(x = reg.exec(info.msg)){
+                    diffs.push(x[1]);
+                }
+
+                rs = analyseReleaseInfo(task, _.unique(diffs));
 
                 if(rs.code == -1){
                     info.status = 'error';
