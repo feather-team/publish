@@ -160,9 +160,13 @@ function release(){
     //lock factory
     RepoService.lock();
     
+    var desc = '';
+
     //switch branch
     taskPreprocess(task.repos, task.branch)
         .then(function(info){
+            desc = info.desc;
+
             if(info && !info.errorMsg){
                 log = info.msg.match(/git log: ([^\r\n]+)/);
 
@@ -196,6 +200,12 @@ function release(){
         .then(stop, stop)
         .fail(function(e){
             Log.error(e.stack);
+            stop({
+                status: 'error',
+                desc: desc,
+                errorMsg: e.stack,
+                msg: e.stack
+            });
         });
 
     function mail(info){
