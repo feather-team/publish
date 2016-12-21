@@ -148,7 +148,7 @@ Project.analyse = function(repo, needSave){
     }
 };
 
-function analyseDeployConfig(info, branch){
+function analyseDeployConfig(info, branch, retry){
     var type = info.type;
     var deploy = Project.getDeployName(type, branch);
     
@@ -178,11 +178,16 @@ function analyseDeployConfig(info, branch){
             if(_.exists(file)){
                 delete require.cache[file];
                 return require(file);
+            }else if(retry){
+                console.log('retry');
+                return analyseDeployConfig(info, '*');
             }
         }catch(e){
             return false;
         }
     }
+
+    return false;
 }
 
 Project.getDeployName = function(type, branch){
@@ -194,8 +199,8 @@ Project.analyseDeployConfig = function(repo, branch){
     var result = [], pass;
 
     pass = (repo.configs || []).every(function(config){
-        var deploy = analyseDeployConfig(config, branch);
-        
+        var deploy = analyseDeployConfig(config, branch, true);
+        console.log(deploy);
         if(deploy){
             deploy = _.toArray(deploy);
 

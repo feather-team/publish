@@ -8,7 +8,8 @@ module.exports = {
         },
 
         feather2: {
-            '*': 'build'
+            '*': 'offline',
+            'master': 'build'
         },
 
         lothar: {
