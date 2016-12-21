@@ -179,7 +179,6 @@ function analyseDeployConfig(info, branch, retry){
                 delete require.cache[file];
                 return require(file);
             }else if(retry){
-                console.log('retry');
                 return analyseDeployConfig(info, '*');
             }
         }catch(e){
@@ -200,7 +199,7 @@ Project.analyseDeployConfig = function(repo, branch){
 
     pass = (repo.configs || []).every(function(config){
         var deploy = analyseDeployConfig(config, branch, true);
-        console.log(deploy);
+
         if(deploy){
             deploy = _.toArray(deploy);
 
