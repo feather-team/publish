@@ -104,7 +104,7 @@ Repo.updateConfigs = function(repo){
 
 Repo.del = function(id, unCheckLocked){
     if(locked && !unCheckLocked){
-        return this.exports('当前所有仓库处于锁定状态，请等待解锁后再次操作');
+        return this.error('当前所有仓库处于锁定状态，请等待解锁后再次操作');
     }
 
     var repo;
