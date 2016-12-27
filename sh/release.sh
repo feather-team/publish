@@ -120,6 +120,12 @@ do
         cd $root${dir}
         echo -e "恢复[${dir}]目录master分支\n"
         execCommand $dir "git checkout master"
+
+        if [[ $branch != "master" ]]
+        then
+            echo -e "当前操作分支非master分支，进行删除本地分支操作\n"
+            execCommand $dir "git branch -D ${branch}"
+        fi
     fi
 done
 
