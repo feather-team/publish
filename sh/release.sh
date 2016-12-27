@@ -124,7 +124,7 @@ do
         if [[ $branch != "master" ]]
         then
             echo -e "当前操作分支非master分支，进行删除本地分支操作\n"
-            execCommand $dir "git branch -D ${branch}"
+            `git branch -D ${branch} 2>&1`
         fi
     fi
 done
