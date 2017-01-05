@@ -174,7 +174,7 @@ function release(){
                     log = log[1].slice(1, -1);
                     var s = log.split(' ');
                     log = {
-                        msg: '描述[' + log.substring(s.slice(0, 3).join(' ').length + 1) + ']，提交者[' + s[1] + ']，版本号[' + s[0] + ']',
+                        msg: '描述[' + log.substring(s.slice(0, 3).join(' ').length + 1) + ']，提交者[' + s[1] + ']，版本号[' + s[0] + ']，仓库[' + task.repos.join(',') + ']',
                         mail: s[2]
                     };
                 }
