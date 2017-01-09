@@ -151,7 +151,7 @@ Project.analyse = function(repo, needSave){
 function analyseDeployConfig(info, branch, retry){
     var type = info.type;
     var deploy = Project.getDeployName(type, branch);
-    
+    console.log(deploy);
     if(!deploy) return false;
 
     var file;
@@ -190,8 +190,32 @@ function analyseDeployConfig(info, branch, retry){
 }
 
 Project.getDeployName = function(type, branch){
-    var config = Application.get('config').deploy[type];
-    return config[branch] || config['*'];
+    branch = branch.toLowerCase();
+    var configs = Application.get('config').deploy[type];
+
+    if(configs[branch]){
+        return configs[branch];
+    }
+
+    for(var key in configs){
+        if(key == '*' || key.indexOf('*') == -1){
+            continue;
+        }
+
+        var regString = '^' + key.replace(/\*/g, '.*') + '$';
+        var match = false;
+
+        try{
+            var reg = new RegExp(regString);
+            match = reg.test(branch);
+        }catch(e){};
+        
+        if(match){
+            return configs[key];
+        }
+    }
+
+    return configs['*'];
 };
 
 Project.analyseDeployConfig = function(repo, branch){
