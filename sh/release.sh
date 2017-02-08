@@ -41,7 +41,7 @@ do
         execCommand $dist "git checkout master"
         execCommand $dist "git pull origin master" "1"
 
-        localBranchCount=`git branch -l 2>&1 | grep ${branch}$ | wc -l`
+        localBranchCount=`git branch -l 2>&1 | grep " ${branch}$" | wc -l`
 
         if [[ $localBranchCount -ne 0 ]]
         then
@@ -131,7 +131,7 @@ do
     echo -e "进入[${dist}]目录\n"
     execCommand $dist "git add -A"
     git commit -m "前端编译平台自动提交记录: ${commitMsg}" 2>&1
-    branchCount=`git branch -r 2>&1 | grep ${branch}$ | wc -l`
+    branchCount=`git branch -r 2>&1 | grep "origin/${branch}$" | wc -l`
 
     if [[ $branchCount -ne 0 ]]
     then

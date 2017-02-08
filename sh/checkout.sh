@@ -15,7 +15,7 @@ do
     git reset --hard
     git clean -df
 
-    localBranchCount=`git branch -l 2>&1 | grep "origin/${branch}$" | wc -l`
+    localBranchCount=`git branch -l 2>&1 | grep " ${branch}$" | wc -l`
     version=""
 
     if [[ $localBranchCount -ne 0 ]]
