@@ -78,7 +78,7 @@ function analyseReleaseInfo(task, diffs){
 
         if(errorIndex > -1){
             errorTasks.splice(errorIndex, 1);
-        }else if(configs.length > 1 && !task.isAuto){
+        }else if(configs.length > 1 && task.isAuto){
             configs = configs.filter(function(config){
                 return diffs.indexOf(config.modulename) > -1;
             });
@@ -87,10 +87,7 @@ function analyseReleaseInfo(task, diffs){
                 configs = repo.configs;
             }
         }
-
-        console.log(diffs);
-        console.log(configs);
-
+        
         //analyse common module
         configs.forEach(function(config){
             var dir = config.dir.substring(RepoService.PATH.length);
