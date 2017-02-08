@@ -30,7 +30,7 @@ do
     # noBranch=`echo $fetchRes|grep "Couldn't find remote ref ${branch} fatal:"`
 
     execCommand $dist "git fetch --all -p" "1"
-    branchCount=`git branch -r 2>&1 | grep 'origin/${branch}$' | wc -l`
+    branchCount=`git branch -r 2>&1 | grep "origin/${branch}$" | wc -l`
 
     if [[ $branchCount -ne 0 ]]
     then
