@@ -151,7 +151,7 @@ Project.analyse = function(repo, needSave){
 function analyseDeployConfig(info, branch, retry){
     var type = info.type;
     var deploy = Project.getDeployName(type, branch);
-    console.log(deploy);
+
     if(!deploy) return false;
 
     var file;

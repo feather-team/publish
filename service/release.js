@@ -3,7 +3,7 @@ var RepoService = require('./repo.js'), ProjectService = require('./project.js')
 var RepoModel = require('../model/repo.js');
 var SH_CWD = __dirname + '/../sh';
 
-var autoMode = false, releasing = false, autoTasks = [], manualTasks = [];
+var autoMode = false, releasing = false, autoTasks = [], manualTasks = [], errorTasks = [];
 
 _.extend(exports, require('./common.js'));
 
@@ -74,8 +74,11 @@ function analyseReleaseInfo(task, diffs){
         commons[repo.configs[0].name] = false;
 
         var configs = repo.configs;
+        var errorIndex = errorTasks.indexOf(id + '~' + task.branch);
 
-        if(configs.length > 1){
+        if(errorIndex > -1){
+            errorTasks.splice(errorIndex, 1);
+        }else if(configs.length > 1 && !task.isAuto){
             configs = configs.filter(function(config){
                 return diffs.indexOf(config.modulename) > -1;
             });
@@ -84,6 +87,9 @@ function analyseReleaseInfo(task, diffs){
                 configs = repo.configs;
             }
         }
+
+        console.log(diffs);
+        console.log(configs);
 
         //analyse common module
         configs.forEach(function(config){
@@ -246,6 +252,15 @@ function release(){
         mail(info);
         RepoService.unlock();
         isAuto ? autoTasks.shift() : manualTasks.shift();
+
+        if(info.status != 'success' || !info){
+            task.repos.forEach(function(repo){
+                errorTasks.push(repo + '~' + task.branch);
+            });
+
+            errorTasks = _.unique(errorTasks);
+        }
+
         releasing = false;
         release();
     }
