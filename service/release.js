@@ -125,11 +125,21 @@ function analyseReleaseInfo(task, diffs){
                 return exports.error('项目[' + name + ']的common模块配置错误已被冻结，请处理后再次执行！');
             }
 
-            if(task.repos.indexOf(commonRepo.id) == -1){
-                var config = commonRepo.configs.filter(function(config){
-                    return config.modulename == 'common';
-                });
+            var config = commonRepo.configs.filter(function(config){
+                var isCommon = config.modulename == 'common';
 
+                if(isCommon){
+                    var dir = config.dir.substring(RepoService.PATH.length);
+
+                    return releases.filter(function(info){
+                        return info.dir == dir;
+                    });
+                }
+
+                return false;
+            });
+
+            if(config.length){
                 deps.push({
                     dir: config[0].dir.substring(RepoService.PATH.length),
                     type: config[0].type
