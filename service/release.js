@@ -2,6 +2,7 @@ var _ = require('../lib/util.js'), Path = require('path'), Task = require('../li
 var RepoService = require('./repo.js'), ProjectService = require('./project.js');
 var RepoModel = require('../model/repo.js');
 var SH_CWD = __dirname + '/../sh';
+var TasksModel = require('../model/tasks.js');
 
 var autoMode = false, releasing = false, autoTasks = [], manualTasks = [], errorTasks = [];
 
@@ -16,6 +17,24 @@ Object.defineProperty(exports, 'autoMode', {
         tasks = [];
     }
 });
+
+function saveTasks(){
+    TasksModel.save([autoTasks, manualTasks]);
+}
+
+setTimeout(function(){
+    var tasks;
+
+    try{
+        tasks = TasksModel.get();
+    }catch(e){};
+
+    if(Array.isArray(tasks)){
+        autoTasks = tasks[0];
+        manualTasks = tasks[1];
+        release();
+    }
+}, 0);
 
 exports.addTask = function(repos, branch, auto){
     var opt = {
@@ -42,6 +61,7 @@ exports.addTask = function(repos, branch, auto){
     }
 
     auto ? autoTasks.push(opt) : manualTasks.push(opt);
+    saveTasks();
     Log.notice('add feather build task: ' + JSON.stringify(opt));
     process.nextTick(release);
     return exports.success('添加任务成功，任务会被安排在最近的任务点上执行');
@@ -268,6 +288,7 @@ function release(){
             errorTasks = _.unique(errorTasks);
         }
 
+        saveTasks();
         releasing = false;
         release();
     }
@@ -300,3 +321,6 @@ function tasking(info, repos, branch, msg){
         args: ['release.sh', branch, msg, RepoService.PATH].concat(args)
     });
 }
+
+
+
