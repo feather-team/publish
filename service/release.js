@@ -22,19 +22,15 @@ function saveTasks(){
     TasksModel.save([autoTasks, manualTasks]);
 }
 
-setTimeout(function(){
-    var tasks;
-
-    try{
-        tasks = TasksModel.get();
-    }catch(e){};
-
+try{
+    var tasks = TasksModel.get();
     if(Array.isArray(tasks)){
         autoTasks = tasks[0];
         manualTasks = tasks[1];
         release();
     }
-}, 0);
+}catch(e){};
+
 
 exports.addTask = function(repos, branch, auto){
     var opt = {
