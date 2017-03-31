@@ -17,6 +17,8 @@ module.exports = {
         }
     },
 
+    listen: ['master', 'hotfix*'],
+
     mail: {
         host: '',
         from: '',

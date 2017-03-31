@@ -202,7 +202,7 @@ Project.getDeployName = function(type, branch){
             continue;
         }
 
-        var regString = '^' + key.replace(/\*/g, '.*') + '$';
+        var regString = '^' + key.replace(/\*/ig, '.*') + '$';
         var match = false;
 
         try{

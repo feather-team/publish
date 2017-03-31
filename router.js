@@ -3,7 +3,7 @@ var router = express.Router();
 
 var controllers = {};
 
-['main','repo','build'].forEach(function(item){
+['main','repo','build', 'status'].forEach(function(item){
 	controllers[item] = require('./controller/' + item + '.js');
 });
 
@@ -15,5 +15,6 @@ router.get('/repo/list', controllers.repo.getList);
 router.post('/repo/add', controllers.repo.add);
 router.get('/repo/search', controllers.repo.search);
 router.post('/repo/del', controllers.repo.del);
+router.get('/status/get', controllers.status.get);
 
 module.exports = router;

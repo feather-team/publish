@@ -1,9 +1,8 @@
 var _ = require('../lib/util.js'), Path = require('path'), Task = require('../lib/task.js'), Q = require('q'), Log = require('../lib/log.js');
-var RepoService = require('./repo.js'), ProjectService = require('./project.js');
-var RepoModel = require('../model/repo.js');
+var RepoService = require('./repo.js'), ProjectService = require('./project.js'), StatusService = require('./status.js');
+var RepoModel = require('../model/repo.js'), StatusModel = require('../model/status.js');
 var SH_CWD = __dirname + '/../sh';
 var TasksModel = require('../model/tasks.js');
-
 var autoMode = false, releasing = false, autoTasks = [], manualTasks = [], errorTasks = [];
 
 _.extend(exports, require('./common.js'));
@@ -19,25 +18,42 @@ Object.defineProperty(exports, 'autoMode', {
 });
 
 function saveTasks(){
-    TasksModel.save([autoTasks, manualTasks]);
+    TasksModel.save({
+        auto: autoTasks, 
+        manual: manualTasks
+    });
 }
 
 try{
-    var tasks = TasksModel.get();
-    if(Array.isArray(tasks)){
-        autoTasks = tasks[0];
-        manualTasks = tasks[1];
-        release();
-    }
+    var tasks = TasksModel.get() || {};
+    autoTasks = tasks.auto || [];
+    manualTasks = tasks.manual || [];
+    release();
 }catch(e){};
 
+var listens = Application.get('config').listen || [];
+var matchBranches = listens.map(function(branch){
+    return new RegExp('^' + branch.replace(/\*/gi, '.*') + '$');
+});
 
 exports.addTask = function(repos, branch, auto){
     var opt = {
         repos: _.toArray(repos),
         branch: branch,
-        isAuto: auto || false
+        isAuto: auto || false,
+        time: Date.now(),
+        status: StatusModel.STATUS.PENDING
     };
+
+    if(listens.length){
+        var needRelease = matchBranches.some(function(reg){
+            return reg.test(branch);
+        });
+
+        if(!needRelease){
+            return exports.error('分支[' + branch + ']不在监听列表内，当前平台只监听分支[' + listens.join(',') + ']');
+        }
+    }
 
     if(!opt.repos.length){
         return exports.error('需要编译的仓库不能为空');
@@ -58,6 +74,7 @@ exports.addTask = function(repos, branch, auto){
 
     auto ? autoTasks.push(opt) : manualTasks.push(opt);
     saveTasks();
+    StatusService.save(opt);
     Log.notice('add feather build task: ' + JSON.stringify(opt));
     process.nextTick(release);
     return exports.success('添加任务成功，任务会被安排在最近的任务点上执行');
@@ -186,6 +203,9 @@ function release(){
         isAuto = true;
     }
 
+    task.status = StatusModel.STATUS.RUNING;
+    StatusService.save(task);
+
     //lock factory
     RepoService.lock();
     
@@ -274,7 +294,7 @@ function release(){
     function stop(info){
         mail(info);
         RepoService.unlock();
-        isAuto ? autoTasks.shift() : manualTasks.shift();
+        var taskInfo = isAuto ? autoTasks.shift() : manualTasks.shift();
 
         if(info.status != 'success' || !info){
             task.repos.forEach(function(repo){
@@ -282,8 +302,12 @@ function release(){
             });
 
             errorTasks = _.unique(errorTasks);
+            taskInfo.status = StatusModel.STATUS.ERROR;
+        }else{
+            taskInfo.status = StatusModel.STATUS.SUCCESS;
         }
 
+        StatusService.save(taskInfo);
         saveTasks();
         releasing = false;
         release();

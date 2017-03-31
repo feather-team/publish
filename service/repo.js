@@ -2,7 +2,7 @@ var Path = require('path'), _ = require('../lib/util.js'), Task = require('../li
 var GIT_PATH = exports.PATH = Path.normalize(__dirname + '/../data/git/');
 
 var RepoModel = require('../model/repo.js'), BranchModel = require('../model/branch.js');
-var BranchService = require('./branch.js'), ProjectService = require('./project.js');
+var ProjectService = require('./project.js');
 var waitCloneRepo = {}, locked = false;
 
 function analyseAddress(url){
@@ -71,7 +71,6 @@ Repo.add = function(address){
             });
         }
         
-        BranchService.updateBranch(repo);
     }, function(){
         exports.del(id, true);
         delete waitCloneRepo[id];
