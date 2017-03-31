@@ -6,7 +6,7 @@ exports.get = function(repo, branch){
 };
 
 exports.id = function(repo, branch){
-    if(repo.indexOf('@')){
+    if(repo.indexOf('@') > -1){
         return repo;
     }else{
         return repo + '@' + branch;
