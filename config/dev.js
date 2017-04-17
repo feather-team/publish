@@ -13,11 +13,13 @@ module.exports = {
         },
 
         lothar: {
-            '*': 'build'
+            '*': 'build',
+            'test-remote': 'ftp'
         }
     },
 
-    listen: ['master', 'hotfix*'],
+    listen: ['master', 'hotfix*', 'test-remote'],
+    ignore: ['test-remote'],
 
     mail: {
         host: '',

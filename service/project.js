@@ -230,6 +230,10 @@ Project.analyseDeployConfig = function(repo, branch){
             for(var i = 0; i < deploy.length; i++){
                 var dist = deploy[i];
                 
+                if(dist.receiver || dist.connect){
+                    return true;
+                }
+
                 if(!dist.to){
                     return false;
                 }

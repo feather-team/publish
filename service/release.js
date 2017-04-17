@@ -32,9 +32,31 @@ try{
 }catch(e){};
 
 var listens = Application.get('config').listen || [];
-var matchBranches = listens.map(function(branch){
+var ignores = Application.get('config').ignore || [];
+var listenBranches = listens.map(function(branch){
     return new RegExp('^' + branch.replace(/\*/gi, '.*') + '$');
 });
+var ignoreBranches = ignores.map(function(branch){
+    return new RegExp('^' + branch.replace(/\*/gi, '.*') + '$');
+});
+
+function isListenBranch(branch){
+    var match;
+
+    if(listens.length){
+        match = listenBranches.some(function(reg){
+            return reg.test(branch);
+        });
+    }
+
+    if(ignores.length){
+        match = ignoreBranches.every(function(reg){
+            return !reg.test(branch);
+        });
+    }
+
+    return typeof match == 'undefined' ? true : match;
+}
 
 exports.addTask = function(repos, branch, auto){
     var opt = {
@@ -45,14 +67,8 @@ exports.addTask = function(repos, branch, auto){
         status: StatusModel.STATUS.PENDING
     };
 
-    if(listens.length){
-        var needRelease = matchBranches.some(function(reg){
-            return reg.test(branch);
-        });
-
-        if(!needRelease){
-            return exports.error('分支[' + branch + ']不在监听列表内，当前平台只监听分支[' + listens.join(',') + ']');
-        }
+    if(!isListenBranch(branch)){
+        return exports.error('分支[' + branch + ']不在监听列表内，当前平台只监听分支[' + listens.join(',') + ']，同时会忽略[' + ignores.join(',') + ']分支');
     }
 
     if(!opt.repos.length){

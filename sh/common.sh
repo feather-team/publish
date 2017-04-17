@@ -36,7 +36,7 @@ function execCommand(){
             echo ""
         fi
     else
-        hasError=`echo $result | grep -iE 'npm ERR!'`
+        hasError=`echo $result | grep -iE 'npm ERR!|deploy error|deploy ftp: error'`
 
         if [[ $code -ne 0 ]] || [[ $hasError != "" ]]
         then
