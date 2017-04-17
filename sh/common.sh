@@ -41,7 +41,7 @@ function execCommand(){
         if [[ $hasError != "" ]]
         then
             echo "${result}" >&2
-            exit(1)
+            exit 1
         elif [[ $code -ne 0 ]]
         then
             echo "${result}"
