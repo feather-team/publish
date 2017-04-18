@@ -44,8 +44,8 @@ function execCommand(){
             exit 1
         elif [[ $code -ne 0 ]]
         then
-            echo "${result}"
-            exit $code
+            echo "${result}" >&2
+            exit 1
         else
             echo "${result}"
             echo ""
