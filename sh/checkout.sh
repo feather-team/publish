@@ -34,6 +34,7 @@ do
     execCommand $arg "git fetch origin ${branch}" "1"
     execCommand $arg "git checkout ${branch}"
     execCommand $arg "git pull origin ${branch}" "1"
+    execCommand $arg "git reset --hard origin/${branch}" "1"
     execCommand $arg "git submodule init"
     execCommand $arg "git submodule update"
 
