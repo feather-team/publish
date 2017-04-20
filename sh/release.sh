@@ -41,7 +41,6 @@ do
         echo "远程${branch}分支不存在，尝试删除本地分支并切换新分支"
         execCommand $dist "git checkout master"
         execCommand $dist "git pull origin master" "1"
-        execCommand $dist "git reset --hard origin/${branch}" "1"
 
         localBranchCount=`git branch -l 2>&1 | grep " ${branch}$" | wc -l`
 
