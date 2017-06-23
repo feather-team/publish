@@ -71,7 +71,7 @@ do
     if [ -e "package.json" ] && [[ $cmd != "feather" ]]
     then
         echo "安装npm插件"
-        execCommand $dir "npm install"
+        execCommand $dir "npm install --registry=https://registry.npm.taobao.org"
     fi
 
     if [[ $cmd == "feather" ]]
@@ -98,7 +98,7 @@ do
     if [ -e "package.json" ] && [[ $cmd != "feather" ]]
     then
         echo "安装npm插件"
-        execCommand $dir "npm install"
+        execCommand $dir "npm install --registry=https://registry.npm.taobao.org"
     fi
 
     if [[ $cmd == "feather" ]]
