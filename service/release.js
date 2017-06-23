@@ -34,10 +34,10 @@ try{
 var listens = Application.get('config').listen || [];
 var ignores = Application.get('config').ignore || [];
 var listenBranches = listens.map(function(branch){
-    return new RegExp('^' + branch.replace(/\*/gi, '.*') + '$');
+    return new RegExp('^' + branch.replace(/\*/g, '.*') + '$', 'i');
 });
 var ignoreBranches = ignores.map(function(branch){
-    return new RegExp('^' + branch.replace(/\*/gi, '.*') + '$');
+    return new RegExp('^' + branch.replace(/\*/g, '.*') + '$', 'i');
 });
 
 function isListenBranch(branch){
