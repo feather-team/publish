@@ -312,11 +312,12 @@ function release(){
     function stop(info){
         mail(info);
         RepoService.unlock();
+
         var taskInfo = isAuto ? autoTasks.shift() : manualTasks.shift();
 
-        Log.notice('保存状态：', JSON.stringify(info));
+        Log.notice('保存状态：' + JSON.stringify(info));
 
-        if(info.status != 'success' || !info){
+        if(!info || info.status != 'success'){
             task.repos.forEach(function(repo){
                 errorTasks.push(repo + '~' + task.branch);
             });
@@ -329,7 +330,7 @@ function release(){
 
         StatusService.save(taskInfo);
         saveTasks();
-        Log.notice('释放任务：', JSON.stringify(taskInfo));
+        Log.notice('释放任务：' + JSON.stringify(taskInfo));
         releasing = false;
         release();
     }
