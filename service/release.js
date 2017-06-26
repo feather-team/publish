@@ -289,6 +289,8 @@ function release(){
                 html = html.replace('{{' + k + '}}', v);
             });
 
+            Log.notice('发送邮件：' + JSON.stringify(info));
+
             require('../lib/mail.js').send({
                 to: log.mail,
                 subject: 'feather自动编译平台任务反馈',
@@ -311,6 +313,8 @@ function release(){
         mail(info);
         RepoService.unlock();
         var taskInfo = isAuto ? autoTasks.shift() : manualTasks.shift();
+
+        Log.notice('保存状态：', JSON.stringify(info));
 
         if(info.status != 'success' || !info){
             task.repos.forEach(function(repo){
