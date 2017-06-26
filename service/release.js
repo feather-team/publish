@@ -325,6 +325,7 @@ function release(){
 
         StatusService.save(taskInfo);
         saveTasks();
+        Log.notice('释放任务：', JSON.stringify(taskInfo));
         releasing = false;
         release();
     }
