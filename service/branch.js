@@ -48,7 +48,7 @@ exports.updateBranches = function(callback){
     var repos = RepoModel.get(), i = 0, arr = [];
     
     for(var key in repos){
-        arr.push(repos[key]);
+        repos[key].feather && arr.push(repos[key]);
     }
 
     var len = arr.length;
@@ -56,11 +56,11 @@ exports.updateBranches = function(callback){
     setTimeout(function(){
         if(i < len){
             exports.updateBranch(arr[i++]);
-            setTimeout(arguments.callee, 300);
+            setTimeout(arguments.callee, 400);
         }else{
             callback && callback();
         }
-    }, 300);
+    }, 400);
 };
 
 exports.clear = function(){
