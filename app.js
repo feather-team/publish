@@ -69,7 +69,10 @@ io.on('connection', function(socket){
 var BranchService = require('./service/branch.js'), ReleaseService = require('./service/release.js');
 
 BranchService.clear();
-BranchService.updateBranches(BranchService.updateBranches);
+
+(function(){
+    BranchService.updateBranches(arguments.callee);
+})();
 
 var Log = require('./lib/log.js');
 
