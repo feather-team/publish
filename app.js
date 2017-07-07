@@ -71,8 +71,7 @@ var BranchService = require('./service/branch.js'), ReleaseService = require('./
 BranchService.clear();
 
 (function(){
-    BranchService.updateBranches();
-    setTimeout(arguments.callee, 20 * 1000);
+    BranchService.updateBranches(BranchService.updateBranches);
 })();
 
 var Log = require('./lib/log.js');

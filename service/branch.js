@@ -44,8 +44,17 @@ exports.updateBranch = function(repo){
     }
 };
 
-exports.updateBranches = function(){
-    _.map(RepoModel.get(), exports.updateBranch);
+exports.updateBranches = function(callback){
+    var repos = RepoModel.get(), i = 0, len = repos.length;
+
+    setTimeout(function(){
+        if(i < len){
+            exports.updateBranch(repos[i++]);
+            setTimeout(arguments.callee, 300);
+        }else{
+            callback();
+        }
+    }, 300);
 };
 
 exports.clear = function(){
