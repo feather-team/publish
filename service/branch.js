@@ -45,14 +45,20 @@ exports.updateBranch = function(repo){
 };
 
 exports.updateBranches = function(callback){
-    var repos = RepoModel.get(), i = 0, len = repos.length;
+    var repos = RepoModel.get(), i = 0, arr = [];
+    
+    for(var key in repos){
+        arr.push(repos[key]);
+    }
+
+    var len = arr.length;
 
     setTimeout(function(){
         if(i < len){
-            exports.updateBranch(repos[i++]);
+            exports.updateBranch(arr[i++]);
             setTimeout(arguments.callee, 300);
         }else{
-            callback();
+            callback && callback();
         }
     }, 300);
 };
