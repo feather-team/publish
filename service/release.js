@@ -96,6 +96,10 @@ exports.addTask = function(repos, branch, auto){
     return exports.success('添加任务成功，任务会被安排在最近的任务点上执行');
 };
 
+exports.noTasks = function(){
+    return !autoTasks.length && !manualTasks.length;
+};
+
 function analyseReleaseInfo(task, diffs){
     var deps = [], releases = [], dists = [], commons = {};
 
@@ -363,6 +367,3 @@ function tasking(info, repos, branch, msg){
         args: ['release.sh', branch, msg, RepoService.PATH].concat(args)
     });
 }
-
-
-
