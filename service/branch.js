@@ -56,7 +56,7 @@ exports.updateBranches = function(callback){
     setTimeout(function(){
         if(i < len){
             exports.updateBranch(arr[i++]);
-            setTimeout(arguments.callee, ReleaseService.noTasks() ? 500 : 3000);
+            setTimeout(arguments.callee, ReleaseService.noTasks() ? 500 : 60 * 1.5 * 1000);
         }else{
             callback && callback();
         }
