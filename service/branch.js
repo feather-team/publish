@@ -7,7 +7,7 @@ exports.updateBranch = function(repo, success, error){
         Task.git({
             args: 'fetch --all -p',
             cwd: repo.dir
-        })
+        }, false, 5000)
         .then(function(info){
             success && success(info);
 
@@ -60,7 +60,9 @@ exports.updateBranches = function(callback){
     function f(){
         if(i < len){
             if(ReleaseService.noTasks()){
-                exports.updateBranch(arr[i++], f, f);
+                setTimeout(function(){
+                    exports.updateBranch(arr[i++], f, f);
+                }, 200);
             }else{
                 setTimeout(f, 60 * 1.5 * 1000);
             }
@@ -68,6 +70,8 @@ exports.updateBranches = function(callback){
             callback && callback();
         }
     }
+
+    f();
 };
 
 exports.clear = function(){
