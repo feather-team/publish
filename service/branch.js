@@ -7,7 +7,7 @@ exports.updateBranch = function(repo, success, error){
         Task.git({
             args: 'fetch --all -p',
             cwd: repo.dir
-        }, false, 5000)
+        }, true, 5000)
         .then(function(info){
             success && success(info);
 
