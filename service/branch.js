@@ -48,7 +48,7 @@ exports.updateBranch = function(repo, success, error){
     }
 };
 
-exports.updateBranches = functi6on(callback){
+exports.updateBranches = function(callback){
     var repos = RepoModel.get(), i = 0, arr = [];
     
     for(var key in repos){
