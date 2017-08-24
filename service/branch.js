@@ -2,13 +2,15 @@ var path = require('path'), _ = require('../lib/util.js'), Task = require('../li
 var RepoModel = require('../model/repo.js'), BranchModel = require('../model/branch.js');
 var ReleaseService = require('./release.js');
 
-exports.updateBranch = function(repo){
+exports.updateBranch = function(repo, success, error){
     if(repo.feather){
         Task.git({
             args: 'fetch --all -p',
             cwd: repo.dir
-        }, true)
+        })
         .then(function(info){
+            success && success(info);
+
             if(ReleaseService.autoMode && !info.errorMsg){
                 info.msg.split(/[\r\n]/g).forEach(function(line){
                     if(line.indexOf('[deleted]') > -1){
@@ -27,6 +29,8 @@ exports.updateBranch = function(repo){
                 args: 'branch -r',
                 cwd: repo.dir
             }, true);
+        }, function(info){
+            error && error(info);
         })
         .then(function(info){
             var branches = [];
@@ -53,14 +57,17 @@ exports.updateBranches = function(callback){
 
     var len = arr.length;
 
-    setTimeout(function(){
+    function f(){
         if(i < len){
-            exports.updateBranch(arr[i++]);
-            setTimeout(arguments.callee, ReleaseService.noTasks() ? 500 : 60 * 1.5 * 1000);
+            if(ReleaseService.noTasks()){
+                exports.updateBranch(arr[i++], f, f);
+            }else{
+                setTimeout(f, 60 * 1.5 * 1000);
+            }
         }else{
             callback && callback();
         }
-    }, 400);
+    }
 };
 
 exports.clear = function(){
