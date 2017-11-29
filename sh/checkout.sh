@@ -38,6 +38,8 @@ do
     execCommand $arg "git submodule init"
     execCommand $arg "git submodule update"
 
+    echo -e "current version:${arg}|${version}\n"
+
     if [[ $version != "" ]]
     then
         diff=`git diff ${version} ${branch} 2>&1 | grep 'diff --git'`

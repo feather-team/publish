@@ -18,6 +18,7 @@ dists=`echo $1 | cut -d ':' -f 2`
 dists=${dists//,/ }
 
 echo -e "产出目录切换分支$branch\n"
+`lalala`
 
 for dist in ${dists[@]}
 do            

@@ -105,6 +105,12 @@ function analyseReleaseInfo(task, diffs){
 
     for(var i = 0; i < task.repos.length; i++){
         var id = task.repos[i];
+        var diff = diffs[id];
+
+        if(diff && !diff.length){
+            continue;
+        }
+
         var repo = RepoModel.get(id);
         var data = ProjectService.analyse(repo, task.branch == 'master');
 
@@ -127,18 +133,11 @@ function analyseReleaseInfo(task, diffs){
         commons[repo.configs[0].name] = false;
 
         var configs = repo.configs;
-        var errorIndex = errorTasks.indexOf(id + '~' + task.branch);
 
-        if(errorIndex > -1){
-            errorTasks.splice(errorIndex, 1);
-        }else if(configs.length > 1 && task.isAuto){
+        if(diff && configs.length){
             configs = configs.filter(function(config){
-                return diffs.indexOf(config.modulename) > -1;
+                return diff.indexOf(config.modulename) > -1;
             });
-
-            if(!configs.length){
-                configs = repo.configs;
-            }
         }
         
         //analyse common module
@@ -229,7 +228,7 @@ function release(){
     //lock factory
     RepoService.lock();
     
-    var desc = '';
+    var desc = '', versions = {};
 
     //switch branch
     taskPreprocess(task.repos, task.branch)
@@ -248,18 +247,34 @@ function release(){
                     };
                 }
 
-                var diffs = [], x, reg = /diff --git a\/([^\/\r\n]+)/g;
+                var diffs = {}, x, reg = /current version:([^\r\n]+)|diff --git a\/([^\/\r\n\t]+)/g;
+                var factory;
 
-                while(x = reg.exec(info.msg)){
-                    diffs.push(x[1]);
+                info.msg.replace(reg, function(all, fv, diff){
+                    if(fv){
+                        var arr = fv.split('|'), version = arr[1];
+                        factory = arr[0];
+
+                        if(version){
+                            diffs[factory] = [];
+                        }
+
+                        versions[factory] = version;
+                    }else if(diff){
+                        diffs[factory].push(diff);
+                    }
+                });
+
+                for(var i in diffs){
+                    diffs[i] = _.unique(diffs[i]);
                 }
 
-                rs = analyseReleaseInfo(task, _.unique(diffs));
-
+                console.log(diffs);
+                rs = analyseReleaseInfo(task, diffs);
+                console.log(JSON.stringify(rs), 123333);
                 if(rs.code == -1){
                     info.status = 'error';
                     info.errorMsg = rs.msg;
-                    mail(info);
                     return false;
                 }
 
@@ -314,29 +329,39 @@ function release(){
     }
 
     function stop(info){
-        mail(info);
-        RepoService.unlock();
+        function complete(){
+            mail(info);
+            RepoService.unlock();
 
-        var taskInfo = isAuto ? autoTasks.shift() : manualTasks.shift();
+            var taskInfo = isAuto ? autoTasks.shift() : manualTasks.shift();
+            console.log(taskInfo)
+            Log.notice('保存状态：' + JSON.stringify(info));
 
-        Log.notice('保存状态：' + JSON.stringify(info));
+            if(!info || info.status != 'success'){
+                taskInfo.status = StatusModel.STATUS.ERROR;
+            }else{
+                taskInfo.status = StatusModel.STATUS.SUCCESS;
+            }
 
-        if(!info || info.status != 'success'){
-            task.repos.forEach(function(repo){
-                errorTasks.push(repo + '~' + task.branch);
-            });
-
-            errorTasks = _.unique(errorTasks);
-            taskInfo.status = StatusModel.STATUS.ERROR;
-        }else{
-            taskInfo.status = StatusModel.STATUS.SUCCESS;
+            StatusService.save(taskInfo);
+            saveTasks();
+            Log.notice('释放任务：' + JSON.stringify(taskInfo));
+            releasing = false;
+            release();
         }
 
-        StatusService.save(taskInfo);
-        saveTasks();
-        Log.notice('释放任务：' + JSON.stringify(taskInfo));
-        releasing = false;
-        release();
+        var isFail = !info || info.status != 'success';
+        var reverts = [];
+
+        task.repos.forEach(function(id){
+            if(isFail){
+                reverts.push(id + ':' + (versions[id] || ''));
+            }else{
+                reverts.push(id + ':' + task.branch);
+            }
+        });
+
+        revert(task.repos, task.branch, reverts).then(complete, complete);
     }
 }
 
@@ -365,5 +390,13 @@ function tasking(info, repos, branch, msg){
         desc: '仓库[' + repos.join(', ') + ']的[' + branch + ']分支进行编译',
         cwd: SH_CWD,
         args: ['release.sh', branch, msg, RepoService.PATH].concat(args)
+    });
+}
+
+function revert(repos, branch, reverts){
+    return Task.sh({
+        desc: '仓库[' + repos.join(', ') + ']的[' + branch + ']分支进行恢复',
+        cwd: SH_CWD,
+        args: ['revert.sh', branch, RepoService.PATH].concat(reverts)
     });
 }
