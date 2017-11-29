@@ -3,7 +3,7 @@ var RepoService = require('./repo.js'), ProjectService = require('./project.js')
 var RepoModel = require('../model/repo.js'), StatusModel = require('../model/status.js');
 var SH_CWD = __dirname + '/../sh';
 var TasksModel = require('../model/tasks.js');
-var autoMode = false, releasing = false, autoTasks = [], manualTasks = [], errorTasks = [];
+var autoMode = false, releasing = false, Tasks = [];
 
 _.extend(exports, require('./common.js'));
 
@@ -18,16 +18,15 @@ Object.defineProperty(exports, 'autoMode', {
 });
 
 function saveTasks(){
-    TasksModel.save({
-        auto: autoTasks, 
-        manual: manualTasks
-    });
+    TasksModel.save(Tasks);
 }
 
 try{
-    var tasks = TasksModel.get() || {};
-    autoTasks = tasks.auto || [];
-    manualTasks = tasks.manual || [];
+    Tasks = TasksModel.get();
+
+    if(_.empty(Tasks)){
+        Tasks = [];
+    }
     release();
 }catch(e){};
 
@@ -59,13 +58,14 @@ function isListenBranch(branch){
 }
 
 exports.addTask = function(repos, branch, auto){
+    console.log(repos);
     var opt = {
         repos: _.toArray(repos),
         branch: branch,
-        isAuto: auto || false,
         time: Date.now(),
         status: StatusModel.STATUS.PENDING
     };
+
 
     if(!isListenBranch(branch)){
         return exports.error('分支[' + branch + ']不在监听列表内，当前平台只监听分支[' + listens.join(',') + ']，同时会忽略[' + ignores.join(',') + ']分支');
@@ -75,20 +75,27 @@ exports.addTask = function(repos, branch, auto){
         return exports.error('需要编译的仓库不能为空');
     }
 
-    if(!auto && (autoTasks.length || manualTasks.length)){
-        var temp = autoTasks.concat(manualTasks);
-        var exists = temp.some(function(task){
-            return task.branch == branch && opt.repos.some(function(repo){
+    if(!auto){
+        for(var i = 1; i < Tasks.length; i++){
+            var task = Tasks[i];
+            var exists = opt.repos.some(function(repo){
                 return task.repos.indexOf(repo) > -1;
             });
-        });
 
-        if(exists){
-            return exports.error('当前仓库分支任务已经存在队列中，请在编译完成后再次进行操作');
+            if(exists && task.branch == branch){
+                Tasks.splice(i, 1);
+                var repos = _.unique(opt.repos.concat(task.repos));
+                return exports.addTask(repos, branch);
+            }
         }
     }
 
-    auto ? autoTasks.push(opt) : manualTasks.push(opt);
+    if(auto || !Tasks.length){
+        Tasks.push(opt);
+    }else{
+        Tasks.splice(1, 0, opt);
+    }
+
     saveTasks();
     StatusService.save(opt);
     Log.notice('add feather build task: ' + JSON.stringify(opt));
@@ -97,7 +104,7 @@ exports.addTask = function(repos, branch, auto){
 };
 
 exports.noTasks = function(){
-    return !autoTasks.length && !manualTasks.length;
+    return !Tasks.length;
 };
 
 function analyseReleaseInfo(task, diffs){
@@ -208,19 +215,13 @@ function analyseReleaseInfo(task, diffs){
 }
 
 function release(){
-    if(releasing || !autoTasks.length && !manualTasks.length) return;
+    if(releasing || !Tasks.length) return;
 
     releasing = true;
 
-    var task, rs, isAuto, log = {};
+    var task, rs, log = {};
 
-    if(manualTasks.length){
-        task = manualTasks[0];
-        isAuto = false;
-    }else{
-        task = autoTasks[0];
-        isAuto = true;
-    }
+    task = Tasks[0];
 
     task.status = StatusModel.STATUS.RUNING;
     StatusService.save(task);
@@ -332,7 +333,7 @@ function release(){
             mail(info);
             RepoService.unlock();
 
-            var taskInfo = isAuto ? autoTasks.shift() : manualTasks.shift();
+            var taskInfo = Tasks.shift();
             Log.notice('保存状态：' + JSON.stringify(info));
 
             if(!info || info.status != 'success'){

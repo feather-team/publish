@@ -26,7 +26,5 @@ exports.save = function(info){
             datetime: _.datetime(info.time),
             desc: StatusModel.getDesc(info.status)
         }, info));
-
-        console.log(2);
     });
 };
