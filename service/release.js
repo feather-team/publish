@@ -269,19 +269,18 @@ function release(){
                     diffs[i] = _.unique(diffs[i]);
                 }
 
-                console.log(diffs);
                 rs = analyseReleaseInfo(task, diffs);
-                console.log(JSON.stringify(rs), 123333);
+
                 if(rs.code == -1){
                     info.status = 'error';
                     info.errorMsg = rs.msg;
+                    stop(info);
                     return false;
                 }
 
-                return tasking(rs.data, task.repos, task.branch, JSON.stringify(log.msg));
+                return tasking(rs.data, task.repos, task.branch, JSON.stringify(log.msg)).then(stop, stop);
             }
         }, stop)
-        .then(stop, stop)
         .fail(function(e){
             Log.error(e.stack);
             stop({
@@ -334,7 +333,6 @@ function release(){
             RepoService.unlock();
 
             var taskInfo = isAuto ? autoTasks.shift() : manualTasks.shift();
-            console.log(taskInfo)
             Log.notice('保存状态：' + JSON.stringify(info));
 
             if(!info || info.status != 'success'){

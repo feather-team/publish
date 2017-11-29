@@ -18,7 +18,6 @@ dists=`echo $1 | cut -d ':' -f 2`
 dists=${dists//,/ }
 
 echo -e "产出目录切换分支$branch\n"
-`lalala`
 
 for dist in ${dists[@]}
 do            
@@ -111,18 +110,6 @@ do
 
     echo "${cmd} release ${arg} -d ${dest}"
     execCommand $dir "${cmd} release ${arg} -d ${dest}"
-done
-
-for release in ${releases[@]}
-do
-    dir=`echo $release | cut -d '~' -f 1`
-    
-    if [ -d "$root${dir}" ]
-    then
-        cd $root${dir}
-        echo -e "恢复[${dir}]目录master分支\n"
-        execCommand $dir "git checkout master"
-    fi
 done
 
 echo -e "\n编译完成，提交代码\n"

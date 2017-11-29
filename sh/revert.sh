@@ -17,6 +17,8 @@ do
     echo -e "进入[${repo}]目录\n"
 
     execCommand $repo "git checkout ${branch}"
+    execCommand $repo "git reset --hard"
+    execCommand $repo "git clean -df"
 
     if [[ $revert != "" ]]
     then

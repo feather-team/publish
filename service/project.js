@@ -173,10 +173,11 @@ function analyseDeployConfig(info, branch, retry){
         }
     }else if(type != 'feather'){
         file = Path.normalize(info.dir + '/conf/deploy/' + deploy + '.js');
-
+        console.log(file);
         try{
             if(_.exists(file)){
                 delete require.cache[file];
+                console.log(require(file));
                 return require(file);
             }else if(retry){
                 return analyseDeployConfig(info, '*');
@@ -240,7 +241,7 @@ Project.analyseDeployConfig = function(repo, branch){
 
                 var to = Path.resolve(config.dir, dist.to);
                 var toId = to.substring(GIT_PATH.length).split(Path.sep).slice(0, 2).join('/');
-
+                console.log(to, toId);
                 if(!RepoModel.get(toId)){
                     return false;
                 }
