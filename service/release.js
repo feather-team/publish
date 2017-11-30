@@ -26,8 +26,16 @@ try{
 
     if(_.empty(Tasks)){
         Tasks = [];
+    }else{
+        releasing = true;
+        revert(Tasks[0], true).then(function(){
+            releasing = false;
+            release();
+        }, function(){
+            releasing = false;
+            release();
+        });
     }
-    release();
 }catch(e){};
 
 var listens = Application.get('config').listen || [];
@@ -266,6 +274,9 @@ function release(){
                     }
                 });
 
+                task.versions = versions;
+                saveTasks();
+
                 for(var i in diffs){
                     diffs[i] = _.unique(diffs[i]);
                 }
@@ -349,18 +360,7 @@ function release(){
             release();
         }
 
-        var isFail = !info || info.status != 'success';
-        var reverts = [];
-
-        task.repos.forEach(function(id){
-            if(isFail){
-                reverts.push(id + ':' + (versions[id] || ''));
-            }else{
-                reverts.push(id + ':' + task.branch);
-            }
-        });
-
-        revert(task.repos, task.branch, reverts).then(complete, complete);
+        revert(task, !info || info.status != 'success').then(complete, complete);
     }
 }
 
@@ -392,7 +392,17 @@ function tasking(info, repos, branch, msg){
     });
 }
 
-function revert(repos, branch, reverts){
+function revert(task, isFail){
+    var reverts = [], versions = task.versions || {}, repos = task.repos, branch = task.branch;
+
+    repos.forEach(function(id){
+        if(isFail){
+            reverts.push(id + ':' + (versions[id] || ''));
+        }else{
+            reverts.push(id + ':' + task.branch);
+        }
+    });
+
     return Task.sh({
         desc: '仓库[' + repos.join(', ') + ']的[' + branch + ']分支进行恢复',
         cwd: SH_CWD,
