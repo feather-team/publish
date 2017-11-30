@@ -66,7 +66,6 @@ function isListenBranch(branch){
 }
 
 exports.addTask = function(repos, branch, auto){
-    console.log(repos);
     var opt = {
         repos: _.toArray(repos),
         branch: branch,
@@ -145,16 +144,18 @@ function analyseReleaseInfo(task, diffs){
 
         dists = dists.concat(data.data);
 
-        commons[repo.configs[0].name] = false;
-
         var configs = repo.configs;
 
-        if(diff && configs.length){
-            configs = configs.filter(function(config){
-                return diff.indexOf(config.modulename) > -1;
-            });
+        if(configs[0].type != 'feather2'){
+            commons[configs[0].name] = false;
+
+            if(diff && configs.length){
+                configs = configs.filter(function(config){
+                    return diff.indexOf(config.modulename) > -1;
+                });
+            }
         }
-        
+
         //analyse common module
         configs.forEach(function(config){
             var dir = config.dir.substring(RepoService.PATH.length);
