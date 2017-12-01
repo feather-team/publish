@@ -146,14 +146,12 @@ function analyseReleaseInfo(task, diffs){
 
         var configs = repo.configs;
 
-        if(configs[0].type != 'feather2'){
-            commons[configs[0].name] = false;
+        commons[configs[0].name] = false;
 
-            if(diff && configs.length){
-                configs = configs.filter(function(config){
-                    return diff.indexOf(config.modulename) > -1;
-                });
-            }
+        if(diff && configs.length > 1){
+            configs = configs.filter(function(config){
+                return diff.indexOf(config.modulename) > -1;
+            });
         }
 
         //analyse common module
